@@ -1,4 +1,4 @@
-import { Trait } from "../assets/sprites/trait";
+import { Trait } from "./trait";
 import { Rectangle, orientationMap } from "../helpers/geometry";
 import { detectionTraits, dietTraits, mobilityTraits } from "../helpers/trait-maps";
 import { Characteristics } from "../interfaces/characteristics";
@@ -15,7 +15,7 @@ export class Organism extends Phaser.GameObjects.Group {
     private hunger: number;
     private age: number;
     private characteristics: Characteristics;
-    private detector: Detector;
+    detector: Detector;
     
     body: Phaser.Physics.Arcade.Body;
 
@@ -81,7 +81,7 @@ export class Organism extends Phaser.GameObjects.Group {
         drawnTraits.forEach((trait: Trait) => {
             if (trait.isDrawable) {
                 trait.rotation = orientationMap.get(this.orientation);
-                trait.Draw();
+                this.add(this.scene.add.existing(trait));
             }
         })
     }

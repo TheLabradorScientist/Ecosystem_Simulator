@@ -1,4 +1,4 @@
-import { Trait, build, ears, extremity, eyes, forelimbShape, gut, hindlimbShape, nose, patterns, size, skin, tail, teeth } from "../assets/sprites/trait";
+import { Trait, build, ears, extremity, eyes, forelimbShape, gut, hindlimbShape, nose, patterns, size, skin, tail, teeth } from "./trait";
 import { Randomize, position } from "../helpers/geometry";
 
 export const limbParts = ["Forelimb", "Hindlimb", "Extremity"];

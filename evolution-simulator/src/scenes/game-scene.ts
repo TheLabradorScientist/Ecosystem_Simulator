@@ -21,6 +21,12 @@ export class GameScene extends Phaser.Scene {
         this.population = [];
     }
 
+    preload(): void {
+        this.load.pack('preload', './assets/pack.json', 'preload');
+    }
+
+    init(): void {}
+
     createTree(x: number, y: number): void {
         const tree = this.add.image(x*80, y*80, 'treeBg');
         this.trees.add(tree);
@@ -35,12 +41,6 @@ export class GameScene extends Phaser.Scene {
         const water = this.add.image(x*80, y*80, 'waterBg');
         this.waterBodies.add(water);
     }
-
-    preload(): void {
-        this.load.pack('preload', './assets/pack.json', 'preload');
-    }
-
-    init(): void {}
 
     create(): void {
         // Generate tile map
@@ -82,6 +82,28 @@ export class GameScene extends Phaser.Scene {
             })
         })
 
+        for (let x=0; x < 5; x++) {
+            let newX = Phaser.Math.Between(0, 800);
+            let newY = Phaser.Math.Between(0, 800);
+            let org = new Organism({
+                scene: this,
+                texture: null,
+                rect: {center: {x: newX, y: newY}, width: 80, height: 80},
+                orientation: RandomOrientation(),
+            });
+            this.population[x] = org;
+            this.population[x].Draw();
+            console.log(this.population[x].toString())
+        }
+
+        this.waterBodies.setDepth(1);
+        this.trees.setDepth(2);
+        this.berries.setDepth(2);
+        this.population.forEach((org: Organism) => {
+            org.setDepth(2)
+            org.detector.arc.setDepth(2)
+        })
+
 
 /*         for (let x=0; x < 5; x++) {
             let newX = Phaser.Math.Between(0, 800);
@@ -96,20 +118,6 @@ export class GameScene extends Phaser.Scene {
             this.population[x].Draw();
             console.log(this.population[x].toString())
         } */
-
-        for (let x=0; x < 5; x++) {
-            let newX = Phaser.Math.Between(0, 800);
-            let newY = Phaser.Math.Between(0, 800);
-            let org = new Organism({
-                scene: this,
-                texture: null,
-                rect: {center: {x: newX, y: newY}, width: 80, height: 80},
-                orientation: RandomOrientation(),
-            });
-            this.population[x] = org;
-            this.population[x].Draw();
-            console.log(this.population[x].toString())
-        }
         
         //let s1 = {center: {x: 50, y: 50}, radius:50, percent:0.25, orientation:orientationMap.get("southeast") ?? 0}
         //let detector = new Detector({center: {x:50, y:50}, width:80, height:80}, 0, "west", this);
