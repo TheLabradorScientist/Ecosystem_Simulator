@@ -1,0 +1,48 @@
+{
+  "name": "phaser3-typescript",
+  "version": "1.5.5",
+  "description": "Boilerplate, Game Examples and Tutorials for Phaser 3 in TypeScript",
+  "keywords": [
+    "Phaser",
+    "Phaser 3",
+    "Phaser3",
+    "Html5-game",
+    "Phaser-boilerplate",
+    "TypeScript",
+    "Webpack",
+    "Tutorials",
+    "Phaser-tutorial",
+    "Game Examples",
+    "Phaser-game",
+    "Phaser-framework",
+    "Phaser3-example"
+  ],
+  "devDependencies": {
+    "copy-webpack-plugin": "^12.0.2",
+    "html-webpack-plugin": "^5.6.0",
+    "prettier": "3.2.5",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+
+    "evolution simulator": "cd evolution-simulator && yarn && yarn run serve-dev",
+
+    "prettier": "yarn prettier-ts && yarn prettier-json && yarn prettier-html",
+    "prettier-ts": "prettier --write \"**/*.ts\"",
+    "prettier-json": "prettier --write \"**/*.json\"",
+    "prettier-html": "prettier --write \"**/*.html\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitsensitive/phaser3-typescript.git"
+  },
+  "author": {
+    "name": "digitsensitive",
+    "email": "digit.sensitivee@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/digitsensitive/phaser3-typescript/issues"
+  },
+  "homepage": "https://github.com/digitsensitive/phaser3-typescript#readme"
+}
