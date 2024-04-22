@@ -21,13 +21,6 @@ export function DrawSector(scene: Phaser.Scene, sector: Sector): Phaser.GameObje
     return graphics;
 }
 
-// Rectangle type
-export interface Rectangle {
-    center: position,
-    width: number,
-    height: number,
-}
-
 // Map of all possible orientations and corresponding unit circle radian values
 export const orientationMap = new Map<string, number>([
     ["north", (3*Math.PI/2)],

@@ -1,20 +1,17 @@
-import { Rectangle } from "../helpers/geometry";
 import { SpriteConstructor } from "../interfaces/sprite-interface";
 
 export class Trait extends Phaser.GameObjects.Sprite {
 	name: string;
     scene: Phaser.Scene;
-    rect: Rectangle;
+    rect: Phaser.GameObjects.Rectangle;
     isDrawable: boolean;
-    orientation: string;
 
 	body: Phaser.Physics.Arcade.Body
 
 	// Scales to height/width of rectangle. Scale factor derived from rect.
     constructor(aParams: SpriteConstructor) {
-		super(aParams.scene, aParams.rect.center.x, aParams.rect.center.y, aParams.texture);
+		super(aParams.scene, aParams.rect.x, aParams.rect.y, aParams.texture);
 		this.rect = aParams.rect;
-		this.orientation = aParams.orientation;
 		// Phaser.GameObjects.Components.Transform.rotation -- use for orienting organisms
 		this.name = aParams.texture;
 		this.body;

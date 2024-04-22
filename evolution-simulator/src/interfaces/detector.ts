@@ -1,13 +1,13 @@
-import { DrawSector, Rectangle, Sector, orientationMap } from "../helpers/geometry";
+import { DrawSector, Sector, orientationMap } from "../helpers/geometry";
 
 export class Detector {
     sector: Sector;
     arc: Phaser.GameObjects.Graphics;
     scene: Phaser.Scene;
 
-    constructor(rect: Rectangle, det: number, orient: string, scene: Phaser.Scene) {
+    constructor(rect: Phaser.GameObjects.Rectangle, det: number, orient: string, scene: Phaser.Scene) {
         this.scene = scene;
-        this.sector = {center: rect.center, radius: 120 + (3*det), percent: (0.5 - (det/25)), orientation: orientationMap.get(orient)};
+        this.sector = {center: {x: rect.x, y: rect.y}, radius: 120 + (3*det), percent: (0.5 - (det/25)), orientation: orientationMap.get(orient)};
 
         this.arc = DrawSector(this.scene, this.sector);
     }

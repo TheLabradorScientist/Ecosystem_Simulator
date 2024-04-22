@@ -12,28 +12,27 @@ export interface Limbs extends Part {
 	extremity:     Trait
 };
 
-export function NewLimbs(scene: Phaser.Scene, pos: position, orient: string): Limbs {
-    let defaultRect = {center: pos, width: 80, height: 80};
-    let newForelimbShape = new Trait({ scene: scene, texture: Randomize(forelimbShape), rect: defaultRect, orientation: orient });
+export function NewLimbs(rect: Phaser.GameObjects.Rectangle): Limbs {
+    let newForelimbShape = new Trait({ scene: rect.scene, texture: Randomize(forelimbShape), rect: rect });
 	let newHindlimbShape: Trait;
     let newExtremity: Trait;
     switch (newForelimbShape.name) {
 	case "fins":
-		newHindlimbShape = new Trait({ scene: scene, texture: Randomize(hindlimbShape.slice(2)), rect: defaultRect, orientation: orient });
-		newExtremity = new Trait({ scene: scene, texture: "no extremities", rect: defaultRect, orientation: orient });
+		newHindlimbShape = new Trait({ scene: rect.scene, texture: Randomize(hindlimbShape.slice(2)), rect: rect });
+		newExtremity = new Trait({ scene: rect.scene, texture: "no extremities", rect: rect });
         break;
     case "wings":
-		newHindlimbShape = new Trait({ scene: scene, texture: "talons", rect: defaultRect, orientation: orient });
-		newExtremity = new Trait({ scene: scene, texture: "no extremities", rect: defaultRect, orientation: orient });
+		newHindlimbShape = new Trait({ scene: rect.scene, texture: "talons", rect: rect });
+		newExtremity = new Trait({ scene: rect.scene, texture: "no extremities", rect: rect });
         break;
     //case "absent": no change
 	case "arms/legs":
-		newHindlimbShape = new Trait({ scene: scene, texture: "legs", rect: defaultRect, orientation: orient });
-		newExtremity = new Trait({ scene: scene, texture: Randomize(extremity.slice(1)), rect: defaultRect, orientation: orient });
+		newHindlimbShape = new Trait({ scene: rect.scene, texture: "legs", rect: rect });
+		newExtremity = new Trait({ scene: rect.scene, texture: Randomize(extremity.slice(1)), rect: rect });
         break;
     default:
-		newHindlimbShape = new Trait({ scene: scene, texture: "no hindlimbs", rect: defaultRect, orientation: orient });
-		newExtremity = new Trait({ scene: scene, texture: "no extremities", rect: defaultRect, orientation: orient });
+		newHindlimbShape = new Trait({ scene: rect.scene, texture: "no hindlimbs", rect: rect });
+		newExtremity = new Trait({ scene: rect.scene, texture: "no extremities", rect: rect });
         break;
     }
 	let traitsArray = [newForelimbShape, newHindlimbShape, newExtremity];
@@ -61,12 +60,11 @@ export interface Head extends Part {
 	ears:   Trait
 };
 
-export function NewHead(scene: Phaser.Scene, pos: position, orient: string): Head {
-	let defaultRect = {center: pos, width: 80, height: 80};
-    let newTeeth = new Trait({ scene: scene, texture: Randomize(teeth), rect: defaultRect, orientation: orient });
-	let newEyes = new Trait({ scene: scene, texture: Randomize(eyes), rect: defaultRect, orientation: orient });
-	let newNose = new Trait({ scene: scene, texture: Randomize(nose), rect: defaultRect, orientation: orient });
-	let newEars = new Trait({ scene: scene, texture: Randomize(ears), rect: defaultRect, orientation: orient });
+export function NewHead(rect: Phaser.GameObjects.Rectangle): Head {
+    let newTeeth = new Trait({ scene: rect.scene, texture: Randomize(teeth), rect: rect });
+	let newEyes = new Trait({ scene: rect.scene, texture: Randomize(eyes), rect: rect });
+	let newNose = new Trait({ scene: rect.scene, texture: Randomize(nose), rect: rect });
+	let newEars = new Trait({ scene: rect.scene, texture: Randomize(ears), rect: rect });
 	let traitsArray = [newTeeth, newEyes, newNose, newEars];
 	return {
 		teeth:  newTeeth,
@@ -95,13 +93,12 @@ export interface Torso extends Part {
 	gut:      Trait
 };
 
-export function NewTorso(scene: Phaser.Scene, pos: position, orient: string): Torso {
-	let defaultRect = {center: pos, width: 80, height: 80};
-	let newBuild = new Trait({ scene: scene, texture: Randomize(build), rect: defaultRect, orientation: orient });
-	let newSize = new Trait({ scene: scene, texture: Randomize(size), rect: defaultRect, orientation: orient });
-	let newPatterns = new Trait({ scene: scene, texture: Randomize(patterns), rect: defaultRect, orientation: orient });
-	let newSkin = new Trait({ scene: scene, texture: Randomize(skin), rect: defaultRect, orientation: orient });
-	let newGut = new Trait({ scene: scene, texture: Randomize(gut), rect: defaultRect, orientation: orient });
+export function NewTorso(rect: Phaser.GameObjects.Rectangle): Torso {
+	let newBuild = new Trait({ scene: rect.scene, texture: Randomize(build), rect: rect });
+	let newSize = new Trait({ scene: rect.scene, texture: Randomize(size), rect: rect });
+	let newPatterns = new Trait({ scene: rect.scene, texture: Randomize(patterns), rect: rect });
+	let newSkin = new Trait({ scene: rect.scene, texture: Randomize(skin), rect: rect });
+	let newGut = new Trait({ scene: rect.scene, texture: Randomize(gut), rect: rect });
 	let traitsArray = [newBuild, newSize, newPatterns, newSkin, newGut];
 	return {
 		build:    newBuild,
@@ -125,9 +122,8 @@ export interface Tail extends Part {
 	tail: Trait
 };
 
-export function NewTail(scene: Phaser.Scene, pos: position, orient: string): Tail {
-	let defaultRect = {center: pos, width: 80, height: 80};
-	let newTail = new Trait({ scene: scene, texture: Randomize(tail), rect: defaultRect, orientation: orient });
+export function NewTail(rect: Phaser.GameObjects.Rectangle): Tail {
+	let newTail = new Trait({ scene: rect.scene, texture: Randomize(tail), rect: rect });
 	return {
 		tail: newTail,
 	}

@@ -25,7 +25,8 @@ export class GameScene extends Phaser.Scene {
         this.load.pack('preload', './assets/pack.json', 'preload');
     }
 
-    init(): void {}
+    init(): void {
+    }
 
     createTree(x: number, y: number): void {
         const tree = this.add.image(x*80, y*80, 'treeBg');
@@ -85,12 +86,7 @@ export class GameScene extends Phaser.Scene {
         for (let x=0; x < 5; x++) {
             let newX = Phaser.Math.Between(0, 800);
             let newY = Phaser.Math.Between(0, 800);
-            let org = new Organism({
-                scene: this,
-                texture: null,
-                rect: {center: {x: newX, y: newY}, width: 80, height: 80},
-                orientation: RandomOrientation(),
-            });
+            let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80), RandomOrientation());
             this.population[x] = org;
             this.population[x].Draw();
             console.log(this.population[x].toString())
@@ -100,8 +96,26 @@ export class GameScene extends Phaser.Scene {
         this.trees.setDepth(2);
         this.berries.setDepth(2);
         this.population.forEach((org: Organism) => {
-            org.setDepth(2)
+
+            org.setDepth(2);
             org.detector.arc.setDepth(2)
+
+            const treeColliders = this.trees.getChildren();
+
+            treeColliders.forEach((tree: Phaser.GameObjects.Image) => {
+                const orgBounds = org.rect.getBounds();
+                const treeBounds = tree.getBounds();
+                if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
+                    console.log(orgBounds.centerY + " vs " + treeBounds.centerY)
+                    if (orgBounds.centerY < treeBounds.centerY) {
+                        org.setDepth(1);
+                        org.detector.arc.setDepth(1);
+                    } else {
+                        org.setDepth(2);
+                        org.detector.arc.setDepth(2);
+                    }
+                } 
+            })
         })
 
 
