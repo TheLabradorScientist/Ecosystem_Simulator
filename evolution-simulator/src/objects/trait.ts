@@ -24,7 +24,6 @@ export class Trait extends Phaser.GameObjects.Sprite {
 		} else {
 			this.isDrawable = false;
 		}
-		this.name = texture;
 	}
 };
 

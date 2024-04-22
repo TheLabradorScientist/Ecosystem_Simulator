@@ -53,11 +53,11 @@
 		},
 		{
 			"type": "image",
-			"key": " short muzzle ",
+			"key": "short muzzle",
 			"url": "./assets/images/face_muzzle.png"			
 		},	{
 			"type": "image",
-			"key": " long snout ",
+			"key": "long snout",
 			"url": "./assets/images/face_snout.png"			
 		},
 		{

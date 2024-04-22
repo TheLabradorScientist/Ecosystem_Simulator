@@ -21,10 +21,6 @@ export class GameScene extends Phaser.Scene {
         this.population = [];
     }
 
-    preload(): void {
-        this.load.pack('preload', './assets/pack.json', 'preload');
-    }
-
     init(): void {
     }
 
@@ -106,7 +102,6 @@ export class GameScene extends Phaser.Scene {
                 const orgBounds = org.rect.getBounds();
                 const treeBounds = tree.getBounds();
                 if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
-                    console.log(orgBounds.centerY + " vs " + treeBounds.centerY)
                     if (orgBounds.centerY < treeBounds.centerY) {
                         org.setDepth(1);
                         org.detector.arc.setDepth(1);
@@ -120,12 +115,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     update() {
-        if (Phaser.Math.Between(0, 10) == 5) {
-            this.population.forEach((org: Organism) => {
+        this.population.forEach((org: Organism) => {  
+            if (Phaser.Math.Between(0, 5) == 5) {    
                 org.Move();
                 org.Draw();
-            })   
-        }
+            }
+        })   
         this.population.forEach((org: Organism) => {
 
             const treeColliders = this.trees.getChildren();
@@ -134,7 +129,6 @@ export class GameScene extends Phaser.Scene {
                 const orgBounds = org.rect.getBounds();
                 const treeBounds = tree.getBounds();
                 if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
-                    console.log(orgBounds.centerY + " vs " + treeBounds.centerY)
                     if (orgBounds.centerY < treeBounds.centerY) {
                         org.setDepth(1);
                         org.detector.arc.setDepth(1);

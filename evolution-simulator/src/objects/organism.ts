@@ -60,14 +60,18 @@ export class Organism extends Phaser.GameObjects.Group {
 
     }
 
+    Turn() {
+        this.orientation = RandomOrientation();
+        this.rect.rotation = orientationMap.get(this.orientation);
+        this.detector.sector.orientation = this.rect.rotation;        
+    }
+
     Move() {
         if (this.target == null) {
             let rand = Phaser.Math.Between(0, 8);
             switch (rand) {
                 case 1:
-                    this.orientation = RandomOrientation();
-                    this.rect.rotation = orientationMap.get(this.orientation);
-                    this.detector.sector.orientation = this.rect.rotation;
+                    this.Turn();
                     break;
                 case 2:
                     return; 
@@ -104,6 +108,9 @@ export class Organism extends Phaser.GameObjects.Group {
                     }
                     this.detector.sector.center.x = this.rect.x;
                     this.detector.sector.center.y = this.rect.y;
+                    if (this.rect.x <= 0 || this.rect.y <= 0 || this.rect.x >= 800 || this.rect.y >= 800 ) {
+                        this.Turn();
+                    }
                     break;
             }
         }
@@ -128,7 +135,10 @@ export class Organism extends Phaser.GameObjects.Group {
     }
 
     Draw() {
-        let drawnTraits = [this.torso.build, this.limbs.forelimbShape, this.limbs.hindlimbShape, this.limbs.extremity, this.tail.tail, this.head.nose, this.head.ears, this.head.eyes, this.torso.patterns]
+        let drawnTraits = [this.torso.build, this.limbs.forelimbShape, 
+            this.limbs.hindlimbShape, this.limbs.extremity, 
+            this.tail.tail, this.head.nose, this.head.ears, 
+            this.head.eyes, this.torso.patterns];
         drawnTraits.forEach((trait: Trait) => {
             if (trait.isDrawable) {
                 trait.rect.x, trait.x = this.rect.x;
