@@ -1,20 +1,18 @@
-import { DrawSector, Sector, orientationMap } from "../helpers/geometry";
+import { DrawSector, Sector } from "../helpers/geometry";
+
+export interface Target {}
 
 export class Detector {
     sector: Sector;
     arc: Phaser.GameObjects.Graphics;
     scene: Phaser.Scene;
 
-    constructor(rect: Phaser.GameObjects.Rectangle, det: number, orient: string, scene: Phaser.Scene) {
-        this.scene = scene;
-        this.sector = {center: {x: rect.x, y: rect.y}, radius: 120 + (3*det), percent: (0.5 - (det/25)), orientation: orientationMap.get(orient)};
+    constructor(rect: Phaser.GameObjects.Rectangle, det: number) {
+        this.scene = rect.scene;
+        this.sector = {center: {x: rect.x, y: rect.y}, radius: 120 + (3*det), percent: (0.5 - (det/25)), orientation: rect.rotation};
 
-        this.arc = DrawSector(this.scene, this.sector);
-    }
-
-    Draw(): Phaser.GameObjects.Graphics {
-        this.arc = DrawSector(this.scene, this.sector);
-        return this.arc;
+        this.arc = this.scene.add.graphics();
+        DrawSector(this.arc, this.sector);
     }
 
     // Want to call this in update function so it constantly checks if any external

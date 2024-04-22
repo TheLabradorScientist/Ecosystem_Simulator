@@ -1,5 +1,5 @@
 import { Trait, build, ears, extremity, eyes, forelimbShape, gut, hindlimbShape, nose, patterns, size, skin, tail, teeth } from "./trait";
-import { Randomize, position } from "../helpers/geometry";
+import { Randomize } from "../helpers/geometry";
 
 export const limbParts = ["Forelimb", "Hindlimb", "Extremity"];
 

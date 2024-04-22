@@ -1,8 +1,8 @@
 import { Trait } from "./trait";
-import { RandomOrientation, orientationMap } from "../helpers/geometry";
+import { DrawSector, RandomOrientation, orientationMap } from "../helpers/geometry";
 import { detectionTraits, dietTraits, mobilityTraits } from "../helpers/trait-maps";
 import { Characteristics } from "../interfaces/characteristics";
-import { Detector } from "../interfaces/detector";
+import { Detector, Target } from "../interfaces/detector";
 import { Head, Limbs, NewTorso, NewHead, NewLimbs, NewTail, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts } from "./body-parts";
 
 export class Organism extends Phaser.GameObjects.Group {
@@ -14,6 +14,7 @@ export class Organism extends Phaser.GameObjects.Group {
     private hunger: number;
     private age: number;
     private characteristics: Characteristics;
+    private target: Target;
     detector: Detector;
     
     body: Phaser.Physics.Arcade.Body;
@@ -37,6 +38,7 @@ export class Organism extends Phaser.GameObjects.Group {
 
         this.hunger = 0;
         this.age = 0;
+        this.target = null;
 
         this.MapTraits(headParts, this.head.traits);
         this.MapTraits(torsoParts, this.torso.traits);
@@ -47,8 +49,7 @@ export class Organism extends Phaser.GameObjects.Group {
         this.characteristics.detection = this.CalculateCharacteristic(detectionTraits)
         this.characteristics.mobility = this.CalculateCharacteristic(mobilityTraits)
 
-        this.detector = new Detector(this.rect, this.characteristics.detection, this.orientation, this.scene);
-        this.detector.Draw();
+        this.detector = new Detector(this.rect, this.characteristics.detection);
 
         this.scene.add.existing(this);
     }
@@ -59,9 +60,53 @@ export class Organism extends Phaser.GameObjects.Group {
 
     }
 
-    Move() {  
-        this.orientation = RandomOrientation();
-        this.rect.rotation = orientationMap.get(this.orientation);
+    Move() {
+        if (this.target == null) {
+            let rand = Phaser.Math.Between(0, 8);
+            switch (rand) {
+                case 1:
+                    this.orientation = RandomOrientation();
+                    this.rect.rotation = orientationMap.get(this.orientation);
+                    this.detector.sector.orientation = this.rect.rotation;
+                    break;
+                case 2:
+                    return; 
+                default:
+                    switch (this.orientation) {
+                    case "north":
+                        this.rect.y -= 10;
+                        break;
+                    case "northeast":
+                        this.rect.y -= 5;
+                        this.rect.x += 5;
+                        break;
+                    case "east":
+                        this.rect.x += 10;
+                        break;
+                    case "southeast":
+                        this.rect.y += 5;
+                        this.rect.x += 5;
+                        break;    
+                    case "south":
+                        this.rect.y += 10;
+                        break;
+                    case "southwest":
+                        this.rect.y += 5;
+                        this.rect.x -= 5;
+                        break;
+                    case "west":
+                        this.rect.x -= 10;
+                        break;
+                    case "northwest":
+                        this.rect.y -= 5;
+                        this.rect.x -= 5;
+                        break;                                
+                    }
+                    this.detector.sector.center.x = this.rect.x;
+                    this.detector.sector.center.y = this.rect.y;
+                    break;
+            }
+        }
     }
 
     Eat() {
@@ -86,10 +131,13 @@ export class Organism extends Phaser.GameObjects.Group {
         let drawnTraits = [this.torso.build, this.limbs.forelimbShape, this.limbs.hindlimbShape, this.limbs.extremity, this.tail.tail, this.head.nose, this.head.ears, this.head.eyes, this.torso.patterns]
         drawnTraits.forEach((trait: Trait) => {
             if (trait.isDrawable) {
+                trait.rect.x, trait.x = this.rect.x;
+                trait.rect.y, trait.y = this.rect.y;
                 trait.rotation = this.rect.rotation;
                 this.add(this.scene.add.existing(trait));
             }
         })
+        this.detector.arc = DrawSector(this.detector.arc, this.detector.sector)
     }
     
 

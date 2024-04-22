@@ -8,13 +8,13 @@ export interface Sector {
     orientation: number;
 }
 // Draw Sector https://newdocs.phaser.io/docs/3.55.2/Phaser.GameObjects.Arc (object collision method)
-export function DrawSector(scene: Phaser.Scene, sector: Sector): Phaser.GameObjects.Graphics {
+export function DrawSector(graphics: Phaser.GameObjects.Graphics, sector: Sector) {
+    graphics.clear();
     // Convert percent of circle to rad & center sector in orientation
     const rad = sector.percent*2*Math.PI;
     // Set angles of sector
     const startAngle = sector.orientation - (rad/2);
     const endAngle = sector.orientation + (rad/2);
-    const graphics = scene.add.graphics();
     graphics.fillStyle(0xff0000, 0.2);
     graphics.slice(sector.center.x, sector.center.y, sector.radius, startAngle, endAngle, false);
     graphics.fillPath();

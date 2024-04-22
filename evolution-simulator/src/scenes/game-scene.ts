@@ -117,34 +117,34 @@ export class GameScene extends Phaser.Scene {
                 } 
             })
         })
+    }
 
+    update() {
+        if (Phaser.Math.Between(0, 10) == 5) {
+            this.population.forEach((org: Organism) => {
+                org.Move();
+                org.Draw();
+            })   
+        }
+        this.population.forEach((org: Organism) => {
 
-/*         for (let x=0; x < 5; x++) {
-            let newX = Phaser.Math.Between(0, 800);
-            let newY = Phaser.Math.Between(0, 800);
-            let org = new Organism({
-                scene: this,
-                texture: null,
-                rect: {center: {x: newX, y: newY}, width: 80, height: 80},
-                orientation: RandomOrientation(),
-            });
-            this.population[x] = org;
-            this.population[x].Draw();
-            console.log(this.population[x].toString())
-        } */
-        
-        //let s1 = {center: {x: 50, y: 50}, radius:50, percent:0.25, orientation:orientationMap.get("southeast") ?? 0}
-        //let detector = new Detector({center: {x:50, y:50}, width:80, height:80}, 0, "west", this);
-        //detector.Draw();
-        
-        //let s2 = {center: {x: 200, y: 100}, radius:75, percent:0.5, orientation:orientationMap.get("west") ?? 0}
-        //let detector2 = new Detector(s2, this);
-        //detector2.Draw();
-        
-        //let s3 = {center: {x: 300, y: 350}, radius:100, percent:0.7, orientation:orientationMap.get("north") ?? 0}
-        //let detector3 = new Detector(s3, this);
-        //detector3.Draw(); 
+            const treeColliders = this.trees.getChildren();
 
+            treeColliders.forEach((tree: Phaser.GameObjects.Image) => {
+                const orgBounds = org.rect.getBounds();
+                const treeBounds = tree.getBounds();
+                if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
+                    console.log(orgBounds.centerY + " vs " + treeBounds.centerY)
+                    if (orgBounds.centerY < treeBounds.centerY) {
+                        org.setDepth(1);
+                        org.detector.arc.setDepth(1);
+                    } else {
+                        org.setDepth(3);
+                        org.detector.arc.setDepth(3);
+                    }
+                } 
+            })
+        })
     }
 }
 
