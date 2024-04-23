@@ -1,7 +1,5 @@
 import { DrawSector, Sector } from "../helpers/geometry";
 
-export interface Target {}
-
 export class Detector {
     sector: Sector;
     arc: Phaser.GameObjects.Graphics;

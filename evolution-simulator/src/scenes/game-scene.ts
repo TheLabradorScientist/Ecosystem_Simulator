@@ -1,5 +1,4 @@
-import { RandomOrientation, orientationMap } from "../helpers/geometry";
-import { Detector } from "../interfaces/detector";
+import { RandomOrientation } from "../helpers/geometry";
 import { Organism } from "../objects/organism";
 
 export class GameScene extends Phaser.Scene {
@@ -80,65 +79,76 @@ export class GameScene extends Phaser.Scene {
         })
 
         for (let x=0; x < 5; x++) {
-            let newX = Phaser.Math.Between(0, 800);
-            let newY = Phaser.Math.Between(0, 800);
-            let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80), RandomOrientation());
+            let newX = Phaser.Math.Between(0, window.innerWidth);
+            let newY = Phaser.Math.Between(0, window.innerHeight);
+            let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80), 
+                RandomOrientation(), new Phaser.Geom.Rectangle(0, 0, window.innerWidth, window.innerHeight));
             this.population[x] = org;
             this.population[x].Draw();
             console.log(this.population[x].toString())
         }
 
-        this.waterBodies.setDepth(1);
+        this.waterBodies.setDepth(0);
         this.trees.setDepth(2);
         this.berries.setDepth(2);
+
+        this.setOrgDepth();
+
+    }
+
+    setOrgDepth() {
         this.population.forEach((org: Organism) => {
 
             org.setDepth(2);
             org.detector.arc.setDepth(2)
 
+            let collisionDetected = false;
+            let collidedWith: Phaser.GameObjects.Image | null;
+
+            const berryColliders = this.berries.getChildren();
             const treeColliders = this.trees.getChildren();
+
+            berryColliders.forEach((berry: Phaser.GameObjects.Image) => {
+                const orgBounds = org.rect.getBounds();
+                const berryBounds = berry.getBounds();
+                if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, berryBounds)) {
+                    collisionDetected = true;
+                    collidedWith = berry;
+                    return;
+                } 
+            })
 
             treeColliders.forEach((tree: Phaser.GameObjects.Image) => {
                 const orgBounds = org.rect.getBounds();
                 const treeBounds = tree.getBounds();
                 if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
-                    if (orgBounds.centerY < treeBounds.centerY) {
-                        org.setDepth(1);
-                        org.detector.arc.setDepth(1);
-                    } else {
-                        org.setDepth(2);
-                        org.detector.arc.setDepth(2);
-                    }
+                    collisionDetected = true;
+                    collidedWith = tree;
+                    return;
                 } 
             })
+            
+            if (collisionDetected) {
+                if (org.rect.getBounds().centerY > collidedWith.getBounds().centerY) {
+                    org.setDepth(3);
+                    org.detector.arc.setDepth(3);
+                } else {
+                    org.setDepth(1);
+                    org.detector.arc.setDepth(1);
+                }
+            }
         })
     }
 
     update() {
         this.population.forEach((org: Organism) => {  
             if (Phaser.Math.Between(0, 5) == 5) {    
-                org.Move();
+                org.Act();
                 org.Draw();
             }
         })   
-        this.population.forEach((org: Organism) => {
-
-            const treeColliders = this.trees.getChildren();
-
-            treeColliders.forEach((tree: Phaser.GameObjects.Image) => {
-                const orgBounds = org.rect.getBounds();
-                const treeBounds = tree.getBounds();
-                if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
-                    if (orgBounds.centerY < treeBounds.centerY) {
-                        org.setDepth(1);
-                        org.detector.arc.setDepth(1);
-                    } else {
-                        org.setDepth(3);
-                        org.detector.arc.setDepth(3);
-                    }
-                } 
-            })
-        })
+        
+        this.setOrgDepth();
     }
 }
 

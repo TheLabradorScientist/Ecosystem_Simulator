@@ -34,15 +34,15 @@ export const teeth = ["sharp canines", "flat molars", "mixed teeth"];
 export const eyes  = ["front, slit pupils", "sides, horizontal pupils", "small, round pupils", "large, round pupils"];   // Drawn
 export const nose  = ["nostrils", "short muzzle", "long snout", "beak"];                                                 // Drawn
 export const ears  = ["no external ears", "forward, triangular ears", "large, movable ears", "small, streamlined ears"]; // Drawn
-// tusks ? horns ?
+// tusks ? horns ? antlers ? - all increase visibility 
 
 export const build    = ["lithe", "bulky", "average"];         // Drawn
-export const size     = ["small", "medium", "large"];          // Applied to image using size factor
+export const size     = ["small", "medium", "large"];          // Applied to image using size factor. May be replaced with rand number generation -10 to 10.
 export const patterns = ["stripes", "spots", "plain"];         /// Stripes blend with grass, spots blend with forest // Drawn
 export const skin     = ["skin", "scales", "feathers", "fur"]; // Wings -> feathers
 export const gut      = ["short, simple", "long, chambered"];
 
-export const forelimbShape = ["arms/legs", "wings", "fins", "no forelimbs"];         // Drawn
+export const forelimbShape = ["arms/legs", "arms/legs", "arms/legs", "wings", "fins", "no forelimbs"];         // Drawn
 export const extremity     = ["no extremities", "claws", "paws", "hands", "hooves"]; // Randomized, ONLY ACCESSED IF LIMBS = ARM/LEG // Drawn
 
 export const hindlimbShape = ["legs", "talons", "hindfins", "no hindlimbs"]; // hindlimb = absent or fin if forelimb = fin, leg if forelimb = leg or wing, absent if forelimb absent

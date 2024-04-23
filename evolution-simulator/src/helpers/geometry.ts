@@ -1,5 +1,11 @@
 // Position type
 export type position = { x: number; y: number}
+
+// Target type // Relationship from -10 (AVOID) to 0 (NEUTRAL) to +10 (APPROACH)
+// Relationship values determined by hunger if food, strength if predator (fight vs flight)
+// Closer to 0 = more neutral, more likely to stop avoiding/approaching sooner.
+export type Target = { object: Phaser.GameObjects.GameObject, relationship: number }
+
 // Sector type
 export interface Sector {
     center: position;
@@ -33,6 +39,17 @@ export const orientationMap = new Map<string, number>([
     ["northwest", (5*Math.PI/4)],
 ])
 
+export const oppositeOrientation = new Map<string, string>([
+    ["north", "south"],
+    ["northeast", "southwest"],
+    ["east", "west"],
+    ["southeast", "northwest"],
+    ["south", "north"],
+    ["southwest", "northeast"],
+    ["west", "east"],
+    ["northwest", "southeast"],
+])
+
 export function RandomOrientation(): string {
 	let keys = Array.from(orientationMap.keys());
 	return keys[Phaser.Math.Between(0, keys.length-1)];
@@ -41,4 +58,27 @@ export function RandomOrientation(): string {
 export function Randomize(s: string[]): string {
 	let seed = Phaser.Math.Between(0, s.length-1);
 	return s[seed];
+}
+
+// "Object is ___ of organism" where ___ is the relative orientation.
+export function GetRelativePosition(orgBound: Phaser.Geom.Rectangle, objBound: Phaser.Geom.Rectangle): string {
+    let newOrientation = "";
+
+    // Check relative vertical pos
+    if (orgBound.centerY - objBound.centerY > 20) { // Object is above organism
+        newOrientation += "north";
+    } else if (orgBound.centerY - objBound.centerY < -20) { // Object is below organism
+        newOrientation += "south";
+    }    
+
+    // Check relative horizontal pos
+    if (orgBound.centerX - objBound.centerX > 20) { // Object is to the left of organism
+        newOrientation += "west";
+    } else if (orgBound.centerX - objBound.centerX < -20) { // Object is to the right of organism
+        newOrientation += "east";
+    }
+
+    // Overlaps if string still empty
+     
+    return newOrientation; // If returns empty string, then objects are overlapping.
 }

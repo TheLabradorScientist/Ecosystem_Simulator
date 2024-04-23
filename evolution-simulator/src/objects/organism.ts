@@ -1,8 +1,8 @@
 import { Trait } from "./trait";
-import { DrawSector, RandomOrientation, orientationMap } from "../helpers/geometry";
+import { DrawSector, GetRelativePosition, RandomOrientation, Target, oppositeOrientation, orientationMap } from "../helpers/geometry";
 import { detectionTraits, dietTraits, mobilityTraits } from "../helpers/trait-maps";
 import { Characteristics } from "../interfaces/characteristics";
-import { Detector, Target } from "../interfaces/detector";
+import { Detector } from "../interfaces/detector";
 import { Head, Limbs, NewTorso, NewHead, NewLimbs, NewTail, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts } from "./body-parts";
 
 export class Organism extends Phaser.GameObjects.Group {
@@ -12,19 +12,25 @@ export class Organism extends Phaser.GameObjects.Group {
     private tail: Tail;
     private parts: Map<Part, Trait>;
     private hunger: number;
+
+    private energy: number; // Determines the probability that the organism will move.
+            // Recovered over time if hunger < 3/4 metabolism. Max = metabolism value.
+
     private age: number;
     private characteristics: Characteristics;
-    private target: Target;
+    private target: Target | null;
     detector: Detector;
     
     body: Phaser.Physics.Arcade.Body;
 
     scene: Phaser.Scene;
+    sceneBounds: Phaser.Geom.Rectangle;
     rect: Phaser.GameObjects.Rectangle;
     orientation: string;
 
-    constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, orientation: string) {
+    constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, orientation: string, bounds: Phaser.Geom.Rectangle) {
 		super(scene);
+        this.sceneBounds = bounds;
 		this.rect = rect;
 		this.orientation = orientation;
         this.rect.setRotation(orientationMap.get(this.orientation));
@@ -49,6 +55,9 @@ export class Organism extends Phaser.GameObjects.Group {
         this.characteristics.detection = this.CalculateCharacteristic(detectionTraits)
         this.characteristics.mobility = this.CalculateCharacteristic(mobilityTraits)
 
+
+        this.energy = this.characteristics.metabolism;
+
         this.detector = new Detector(this.rect, this.characteristics.detection);
 
         this.scene.add.existing(this);
@@ -60,64 +69,75 @@ export class Organism extends Phaser.GameObjects.Group {
 
     }
 
-    Turn() {
-        this.orientation = RandomOrientation();
+    TurnTo(orient: string) {
+        this.orientation = orient;
         this.rect.rotation = orientationMap.get(this.orientation);
         this.detector.sector.orientation = this.rect.rotation;        
     }
 
-    Move() {
+    Act() {
         if (this.target == null) {
             let rand = Phaser.Math.Between(0, 8);
             switch (rand) {
                 case 1:
-                    this.Turn();
+                    this.TurnTo(RandomOrientation());
                     break;
                 case 2:
                     return; 
                 default:
-                    switch (this.orientation) {
-                    case "north":
-                        this.rect.y -= 10;
-                        break;
-                    case "northeast":
-                        this.rect.y -= 5;
-                        this.rect.x += 5;
-                        break;
-                    case "east":
-                        this.rect.x += 10;
-                        break;
-                    case "southeast":
-                        this.rect.y += 5;
-                        this.rect.x += 5;
-                        break;    
-                    case "south":
-                        this.rect.y += 10;
-                        break;
-                    case "southwest":
-                        this.rect.y += 5;
-                        this.rect.x -= 5;
-                        break;
-                    case "west":
-                        this.rect.x -= 10;
-                        break;
-                    case "northwest":
-                        this.rect.y -= 5;
-                        this.rect.x -= 5;
-                        break;                                
+                    if (this.rect.x <= 0 || this.rect.y <= 0 || this.rect.x >= this.sceneBounds.width || this.rect.y >= this.sceneBounds.height ) {
+                        this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.sceneBounds));
                     }
-                    this.detector.sector.center.x = this.rect.x;
-                    this.detector.sector.center.y = this.rect.y;
-                    if (this.rect.x <= 0 || this.rect.y <= 0 || this.rect.x >= 800 || this.rect.y >= 800 ) {
-                        this.Turn();
-                    }
+                    this.Move();
+
+                    // IDEA: Alternative function GetUnstuck() sets organism's target
+                    // to the center of the scene (sceneBounds centerX, center Y) &
+                    // results in organism moving to center until no longer offscreen.
+                    // Target = sceneBounds, relationship = +10
                     break;
             }
         }
     }
 
+    Move() {
+        switch (this.orientation) {
+        case "north":
+            this.rect.y -= 10;
+            break;
+        case "northeast":
+            this.rect.y -= 5;
+            this.rect.x += 5;
+            break;
+        case "east":
+            this.rect.x += 10;
+            break;
+        case "southeast":
+            this.rect.y += 5;
+            this.rect.x += 5;
+            break;    
+        case "south":
+            this.rect.y += 10;
+            break;
+        case "southwest":
+            this.rect.y += 5;
+            this.rect.x -= 5;
+            break;
+        case "west":
+            this.rect.x -= 10;
+            break;
+        case "northwest":
+            this.rect.y -= 5;
+            this.rect.x -= 5;
+            break;                                
+        }
+        this.detector.sector.center.x = this.rect.x;
+        this.detector.sector.center.y = this.rect.y;
+        this.energy--;
+    }
+
     Eat() {
         this.hunger = 0;
+        this.energy = this.characteristics.metabolism;
     }
 
     MapTraits(partType: string[], traits: Trait[]) {
@@ -150,6 +170,11 @@ export class Organism extends Phaser.GameObjects.Group {
         this.detector.arc = DrawSector(this.detector.arc, this.detector.sector)
     }
     
+    checkIfFood(): boolean {
+        return true;
+
+        //if checkIfFood => true, then set target
+    }
 
     toString(): string {
         return ["ORGANISM:\n{ (HEAD):", headToString(this.head),

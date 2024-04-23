@@ -15,7 +15,7 @@ export class BootScene extends Phaser.Scene {
             'progress',
             function(value:number) {
                 this.progressBar.clear();
-                this.progressBar.fillStyle(0xffffff, 1);
+                this.progressBar.fillStyle(0x40f880, 1);
                 this.progressBar.fillRect(
                     this.cameras.main.width/4,
                     this.cameras.main.height/2 - 16,

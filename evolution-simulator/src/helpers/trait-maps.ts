@@ -91,3 +91,43 @@ export const detectionTraits = new Map<string, number>([
 
 
 // Absent body parts decrease visibility- ideal for ambuush carnivores (ie snakes).
+
+export const visibilityTraits = new Map<string, number>([ // Ehh
+	["lithe",       -2],
+	["bulky", 		+2],
+
+	["small",      -2],
+	["large",      +2],
+
+	["stripes",     -2],
+	["spots", 		-2],
+	// Option for colorful markings ?
+
+	["no forelimbs",      -2],
+	["no hindlimbs",  		-2],
+	
+])
+
+export const speedTraits = new Map<string, number>([ // Work in Progress
+	["lithe",       +2],
+	["bulky", 		-2],
+
+	["small",      +1],
+	["medium",		+2],
+	["large",      -1],
+
+	["small, streamlined ears", +2],
+
+	["scales",     			-2],
+
+	["no forelimbs", 		-1],
+	["no hindlimbs", 		-2],
+	["arms/legs", 			+1],
+	["legs", 				+1],
+	["wings", 				+2],
+	
+	["hooves", 				+2],
+	["paws", 				+2],
+	["hands", 				-2],
+		
+])
