@@ -2,14 +2,14 @@
 	"preload": {
 	  "files": [
 		{
-		  "type": "tilemapTiledJSON",
-		  "key": "evoBg",
-		  "url": "./assets/maps/evoBg.json"
+			"type": "tilemapTiledJSON",
+			"key": "evoBg",
+			"url": "./assets/maps/evoBg.json"
 		},
 		{
-		  "type": "image",
-		  "key": "grassBg",
-		  "url": "./assets/images/grassBg.png"
+			"type": "image",
+			"key": "grassBg",
+			"url": "./assets/images/grassBg.png"
 		},
 		{
 			"type": "image",
@@ -25,6 +25,11 @@
 			"type": "image",
 			"key": "berrySource",
 			"url": "./assets/images/berrySource.png"
+		},
+		{
+			"type": "image",
+			"key": "depleted_berrySource",
+			"url": "./assets/images/depleted_berrySource.png"
 		},
 		{
 			"type": "image",

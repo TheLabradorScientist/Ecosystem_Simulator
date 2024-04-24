@@ -4,7 +4,10 @@ export type position = { x: number; y: number}
 // Target type // Relationship from -10 (AVOID) to 0 (NEUTRAL) to +10 (APPROACH)
 // Relationship values determined by hunger if food, strength if predator (fight vs flight)
 // Closer to 0 = more neutral, more likely to stop avoiding/approaching sooner.
-export type Target = { object: Phaser.GameObjects.GameObject, relationship: number }
+export type Target = { 
+    object: Phaser.GameObjects.GameObject, 
+    objectBounds: Phaser.Geom.Rectangle,
+    relationship: number }
 
 // Sector type
 export interface Sector {

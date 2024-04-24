@@ -131,3 +131,30 @@ export const speedTraits = new Map<string, number>([ // Work in Progress
 	["hands", 				-2],
 		
 ])
+
+export const strengthTraits = new Map<string, number>([ // Work in Progress
+	["lithe",       -2],
+	["bulky", 		+2],
+
+	["small",      -2],
+	["medium",		0],
+	["large",      +2],
+
+	["sharp canines", 		+2],
+	["flat molars", 		-2],
+
+	["skin", 				-2],
+	["feathers", 			-1],
+	["fur", 				+1],
+	["scales", 				+2],
+	
+	["hands", 				-2],
+	["hooves", 				+1],
+	["claws",				+2],
+
+	["talons",				+2]
+		
+])
+
+// Mobility impacts strength/speed based on terrain -
+// Aquatic gets boost in water, terrestrial gets boost on land

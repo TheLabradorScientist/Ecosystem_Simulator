@@ -1,6 +1,6 @@
 import { Trait } from "./trait";
 import { DrawSector, GetRelativePosition, RandomOrientation, Target, oppositeOrientation, orientationMap } from "../helpers/geometry";
-import { detectionTraits, dietTraits, mobilityTraits } from "../helpers/trait-maps";
+import { detectionTraits, dietTraits, mobilityTraits, speedTraits, strengthTraits, visibilityTraits } from "../helpers/trait-maps";
 import { Characteristics } from "../interfaces/characteristics";
 import { Detector } from "../interfaces/detector";
 import { Head, Limbs, NewTorso, NewHead, NewLimbs, NewTail, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts } from "./body-parts";
@@ -19,6 +19,8 @@ export class Organism extends Phaser.GameObjects.Group {
     private age: number;
     private characteristics: Characteristics;
     private target: Target | null;
+    private targetLock: boolean;
+
     detector: Detector;
     
     body: Phaser.Physics.Arcade.Body;
@@ -45,6 +47,7 @@ export class Organism extends Phaser.GameObjects.Group {
         this.hunger = 0;
         this.age = 0;
         this.target = null;
+        this.targetLock = false;
 
         this.MapTraits(headParts, this.head.traits);
         this.MapTraits(torsoParts, this.torso.traits);
@@ -52,9 +55,12 @@ export class Organism extends Phaser.GameObjects.Group {
         this.parts.set("Tail", this.tail.tail);
         this.characteristics = {diet: 0, metabolism: 0, mobility: 0, visibility: 0, detection: 0, speed: 0, strength: 0}
         this.characteristics.diet = this.CalculateCharacteristic(dietTraits);
-        this.characteristics.detection = this.CalculateCharacteristic(detectionTraits)
-        this.characteristics.mobility = this.CalculateCharacteristic(mobilityTraits)
-
+        this.characteristics.metabolism = 50;
+        this.characteristics.visibility = this.CalculateCharacteristic(visibilityTraits);
+        this.characteristics.detection = this.CalculateCharacteristic(detectionTraits);
+        this.characteristics.mobility = this.CalculateCharacteristic(mobilityTraits);
+        this.characteristics.speed = this.CalculateCharacteristic(speedTraits);
+        this.characteristics.strength = this.CalculateCharacteristic(strengthTraits);
 
         this.energy = this.characteristics.metabolism;
 
@@ -96,38 +102,59 @@ export class Organism extends Phaser.GameObjects.Group {
                     // Target = sceneBounds, relationship = +10
                     break;
             }
+        } else {
+            if (this.targetLock = false) {
+                // Set target lock based on probability,
+                // definite lock if |relationship| > 5. 
+                // definite not if |relationship| < 2. 
+                if (Math.abs(this.target.relationship) + Phaser.Math.Between(4, 8) > 10) {
+                      this.targetLock = true; 
+                } else {
+                    this.target = null;
+                    return;
+                }
+            }
+            if (this.target.relationship > 0) {
+                this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.target.objectBounds));
+            } else { // relationship < 0
+                this.TurnTo(oppositeOrientation.get(GetRelativePosition(this.rect.getBounds(), this.target.objectBounds)));
+            }
+    
+            this.Move();
         }
     }
 
     Move() {
+        // Maybe make movement affected by energy
+        const movement = 10 + this.characteristics.speed/2;
         switch (this.orientation) {
         case "north":
-            this.rect.y -= 10;
+            this.rect.y -= movement;
             break;
         case "northeast":
-            this.rect.y -= 5;
-            this.rect.x += 5;
+            this.rect.y -= movement/2;
+            this.rect.x += movement/2;
             break;
         case "east":
-            this.rect.x += 10;
+            this.rect.x += movement;
             break;
         case "southeast":
-            this.rect.y += 5;
-            this.rect.x += 5;
+            this.rect.y += movement/2;
+            this.rect.x += movement/2;
             break;    
         case "south":
-            this.rect.y += 10;
+            this.rect.y += movement;
             break;
         case "southwest":
-            this.rect.y += 5;
-            this.rect.x -= 5;
+            this.rect.y += movement/2;
+            this.rect.x -= movement/2;
             break;
         case "west":
-            this.rect.x -= 10;
+            this.rect.x -= movement;
             break;
         case "northwest":
-            this.rect.y -= 5;
-            this.rect.x -= 5;
+            this.rect.y -= movement/2;
+            this.rect.x -= movement/2;
             break;                                
         }
         this.detector.sector.center.x = this.rect.x;
@@ -173,7 +200,23 @@ export class Organism extends Phaser.GameObjects.Group {
     checkIfFood(): boolean {
         return true;
 
-        //if checkIfFood => true, then set target
+        //if checkIfFood => true, then set target with + relationship, dependent
+        // on hunger. Lower hunger = closer to neutral (0). If prey = other
+        // organism, then check relative strength and weigh against hunger.
+    }
+
+    checkIfPredator(): boolean {
+        return true;
+
+        //if checkIfPredator => true, then set target with - relationship,
+        // dependent on strength vs speed. Low speed, high strength
+        // => closer to neutral (0). Maybe separate method for calculating
+        // probability of fight or flight. Maybe aggression variable will
+        // mean + relationship target even if predator = true.
+    }
+
+    Die() {
+        this.destroy(true, true);
     }
 
     toString(): string {
@@ -184,9 +227,9 @@ export class Organism extends Phaser.GameObjects.Group {
             "(ORIENTATION): ", this.orientation, "}",
             "}\n{ (CHARACTERISTICS): Diet =", this.characteristics.diet,
             " / Metabolism =", this.characteristics.metabolism,
-            " / Mobility =", this.characteristics.mobility,
             " / Visibility =", this.characteristics.visibility,
             " / Detection =", this.characteristics.detection,
+            " / Mobility =", this.characteristics.mobility,
             " / Speed =", this.characteristics.speed,
             " / Strength =", this.characteristics.strength, "}"].join(" ");
     }

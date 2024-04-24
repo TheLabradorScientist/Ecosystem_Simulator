@@ -1,3 +1,5 @@
+import WebFont from "webfontloader";
+
 export class BootScene extends Phaser.Scene {
     private loadingBar: Phaser.GameObjects.Graphics;
     private progressBar: Phaser.GameObjects.Graphics;
@@ -36,6 +38,16 @@ export class BootScene extends Phaser.Scene {
         );
 
         this.load.pack('preload', './assets/pack.json', 'preload');
+        this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
+
+        WebFont.load({
+            google: {
+                families: ['Roboto']
+            },
+            active: () => {
+                this.add.text(150, 100, 'Evolution Simulator', { fontFamily: 'Lugrasimo', fontSize: 80, color: '#ffffff' }).setShadow(2, 2, '#333333', 2, false, true);
+            }
+        })
     }
 
     update(): void {

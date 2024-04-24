@@ -40,7 +40,7 @@ const config: webpack.Configuration = {
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/index.html'),
-      title: 'Space Invaders',
+      title: 'Evolution Simulator',
       inject: 'head'
     })
   ]

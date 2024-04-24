@@ -1,4 +1,5 @@
 import 'phaser';
+import 'webfontloader';
 import { GameConfig } from './config';
 
 export class Game extends Phaser.Game {
