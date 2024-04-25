@@ -30,6 +30,11 @@
 			"type": "image",
 			"key": "depleted_berrySource",
 			"url": "./assets/images/depleted_berrySource.png"
+		},		
+		{
+			"type": "image",
+			"key": "genButton",
+			"url": "./assets/images/gen_Button.png"
 		},
 		{
 			"type": "image",

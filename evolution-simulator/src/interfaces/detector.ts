@@ -1,4 +1,5 @@
 import { DrawSector, Sector } from "../helpers/geometry";
+import { Organism } from "../objects/organism";
 
 export class Detector {
     sector: Sector;
@@ -17,11 +18,15 @@ export class Detector {
     // object overlaps and returns the object(s) if so, else returns null.
     // Also maybe find a way to change orientation of the organism based on the
     // feedback of the detected object: neutral / move toward / move away
-    CollisionDetected(): Phaser.GameObjects.Sprite | Phaser.GameObjects.Image | void {
-        const overlaps = this.scene.physics.overlap(this.arc);
+    CollisionDetected(otherObjects: Phaser.GameObjects.GameObject[]): Phaser.GameObjects.GameObject | null {
+        var overlappingList: Phaser.GameObjects.GameObject[] = [];
+        const overlaps = this.scene.physics.overlap(this.arc, otherObjects, (arc, otherObject) => {
+            //overlappingList.push(otherObject);
+        });
+        
         if (overlaps) {
-            return; //Object that it overlaps with
-        }
+            return overlappingList[0]; // First object that it overlaps with
+        } else { return null; }
     }
 
 }

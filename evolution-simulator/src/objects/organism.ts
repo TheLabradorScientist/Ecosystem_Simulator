@@ -162,6 +162,16 @@ export class Organism extends Phaser.GameObjects.Group {
         this.energy--;
     }
 
+    Sense(object: Phaser.GameObjects.GameObject) {     
+        if (object != null) {
+            if (typeof object == typeof Phaser.GameObjects.Image) {
+                this.checkIfFood(object);
+            } else if (typeof object == typeof Organism) {
+                this.checkIfPredator(object);
+            }
+        }
+    }
+
     Eat() {
         this.hunger = 0;
         this.energy = this.characteristics.metabolism;
@@ -197,7 +207,11 @@ export class Organism extends Phaser.GameObjects.Group {
         this.detector.arc = DrawSector(this.detector.arc, this.detector.sector)
     }
     
-    checkIfFood(): boolean {
+    checkIfFood(obj: Phaser.GameObjects.GameObject): boolean {
+        if (typeof obj == typeof Phaser.GameObjects.Image) {
+            
+            return true;   
+        }
         return true;
 
         //if checkIfFood => true, then set target with + relationship, dependent
@@ -205,7 +219,7 @@ export class Organism extends Phaser.GameObjects.Group {
         // organism, then check relative strength and weigh against hunger.
     }
 
-    checkIfPredator(): boolean {
+    checkIfPredator(obj: Phaser.GameObjects.GameObject): boolean {
         return true;
 
         //if checkIfPredator => true, then set target with - relationship,

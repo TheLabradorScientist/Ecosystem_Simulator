@@ -42,16 +42,14 @@ export class BootScene extends Phaser.Scene {
 
         WebFont.load({
             google: {
-                families: ['Roboto']
+                families: ['Lugrasimo']
             },
-            active: () => {
-                this.add.text(150, 100, 'Evolution Simulator', { fontFamily: 'Lugrasimo', fontSize: 80, color: '#ffffff' }).setShadow(2, 2, '#333333', 2, false, true);
-            }
+            active: () => {}
         })
     }
 
     update(): void {
-        this.scene.start('GameScene');
+        this.scene.start('MenuScene');
     }
 
 

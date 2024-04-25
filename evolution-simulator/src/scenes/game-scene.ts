@@ -24,17 +24,17 @@ export class GameScene extends Phaser.Scene {
     }
 
     createTree(x: number, y: number): void {
-        const tree = this.add.image(x*80, y*80, 'treeBg');
+        const tree = this.add.image(x*80, (y*80)-10, 'treeBg');
         this.trees.add(tree);
     }
 
     createBerry(x: number, y: number): void {
-        const berry = this.add.image(x*80, (y*80)+12, 'berrySource');
+        const berry = this.add.image(x*80, (y*80)+15, 'berrySource');
         this.berries.add(berry);
     }
 
     createWaterBody(x: number, y: number): void {
-        const water = this.add.image(x*80, y*80, 'waterBg');
+        const water = this.add.image(x*80, (y*80)+10, 'waterBg');
         this.waterBodies.add(water);
     }
 
@@ -117,6 +117,13 @@ export class GameScene extends Phaser.Scene {
                     return;
                 } 
             })
+
+            org.Sense(org.detector.CollisionDetected(berryColliders));
+            var orgColliders: Phaser.GameObjects.GameObject[] = [];
+            this.population.forEach((org2: Organism) => {
+                orgColliders.push(org2.rect);
+            })
+            org.Sense(org.detector.CollisionDetected(orgColliders));
 
             treeColliders.forEach((tree: Phaser.GameObjects.Image) => {
                 const orgBounds = org.rect.getBounds();
