@@ -41,7 +41,6 @@ export class GameScene extends Phaser.Scene {
     create(): void {
         // Generate tile map
         this.map = this.make.tilemap( {key: 'evoBg'} );
-        console.log(this.map)
         this.tileset = this.map.addTilesetImage('grass', 'grassBg');
 
         this.backgroundLayer = this.map.createLayer(
@@ -85,7 +84,7 @@ export class GameScene extends Phaser.Scene {
                 RandomOrientation(), new Phaser.Geom.Rectangle(0, 0, window.innerWidth, window.innerHeight));
             this.population[x] = org;
             this.population[x].Draw();
-            console.log(this.population[x].toString())
+            //console.log(this.population[x].toString())
         }
 
         this.waterBodies.setDepth(0);
@@ -96,38 +95,60 @@ export class GameScene extends Phaser.Scene {
 
     }
 
+    // Set up depth of organisms on screen based on collision/overlap detection.
     setOrgDepth() {
         this.population.forEach((org: Organism) => {
 
-            org.setDepth(2);
-            org.detector.arc.setDepth(2)
+            // Set default organism and detector depth.
+            org.drawnParts.setDepth(2);
+            org.detector.sectorGraphic.setDepth(2)
 
             let collisionDetected = false;
             let collidedWith: Phaser.GameObjects.Image | null;
 
+            // Set up colliders for each berry/tree on the map.
             const berryColliders = this.berries.getChildren();
             const treeColliders = this.trees.getChildren();
 
+            // Iterate over each berry object, checking for intersection.
             berryColliders.forEach((berry: Phaser.GameObjects.Image) => {
+                // Get bounding rectangles
                 const orgBounds = org.rect.getBounds();
                 const berryBounds = berry.getBounds();
+                // Check intersection of bounding rectangles, return if any collision detected.
                 if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, berryBounds)) {
                     collisionDetected = true;
                     collidedWith = berry;
                     return;
-                } 
+                }
+                
+                // Set up organism sensing berries.
+                let obj = org.detector.CollisionDetected(berry, berryBounds);
+                if (obj != null) {
+                    org.Sense(obj);
+                }
             })
 
-            org.Sense(org.detector.CollisionDetected(berryColliders));
-            var orgColliders: Phaser.GameObjects.GameObject[] = [];
+            // Set up organism sensing berries.
+            //this.physics.add.group(berryColliders);
+            //org.Sense(org.detector.CollisionDetected(berryColliders));
+
+            // Set up organism sensing other organisms.
+            //var orgColliders: Phaser.GameObjects.GameObject[] = [];
             this.population.forEach((org2: Organism) => {
-                orgColliders.push(org2.rect);
+                const orgBounds = org2.rect.getBounds();
+                let obj = org.detector.CollisionDetected(org2, orgBounds);
+                if (obj != null) {
+                    org.Sense(obj);
+                }
             })
-            org.Sense(org.detector.CollisionDetected(orgColliders));
 
+            // Iterate over each tree object, checking for intersection.
             treeColliders.forEach((tree: Phaser.GameObjects.Image) => {
+                // Get bounding rectangles
                 const orgBounds = org.rect.getBounds();
                 const treeBounds = tree.getBounds();
+                // Check intersection of bounding rectangles, return if any collision detected.
                 if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, treeBounds)) {
                     collisionDetected = true;
                     collidedWith = tree;
@@ -135,13 +156,15 @@ export class GameScene extends Phaser.Scene {
                 } 
             })
             
+            // Change organism depth if collision detected, 
             if (collisionDetected) {
+                // If organism is below collision object, set to bottom layer
                 if (org.rect.getBounds().centerY > collidedWith.getBounds().centerY) {
-                    org.setDepth(3);
-                    org.detector.arc.setDepth(3);
-                } else {
-                    org.setDepth(1);
-                    org.detector.arc.setDepth(1);
+                    org.drawnParts.setDepth(3);
+                    org.detector.sectorGraphic.setDepth(3);
+                } else { // If organism is above collision object, set to top layer
+                    org.drawnParts.setDepth(1);
+                    org.detector.sectorGraphic.setDepth(1);
                 }
             }
         })

@@ -19,11 +19,11 @@ export class Button extends Phaser.GameObjects.Sprite {
     private setupEventListeners() {
         this.on('pointerover', () => {
             this.scene.add.image(this.x, this.y, this.name);
-            console.log('over')
+            //console.log('over')
         })
         this.on('pointerout', () => {
             this.scene.add.image(this.x, this.y, this.name);
-            console.log('out')
+            //console.log('out')
         })
     }
 

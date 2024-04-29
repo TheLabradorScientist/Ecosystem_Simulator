@@ -13,9 +13,16 @@ export type Target = {
 export interface Sector {
     center: position;
     radius: number;
-    percent: number;
-    orientation: number;
+    percent: number; // 0.5 = half-circle, etc.
+    orientation: number; // Unit cicle in radians w/pi
 }
+
+// Line type
+export interface Line {
+    pos1: position;
+    pos2: position
+}
+
 // Draw Sector https://newdocs.phaser.io/docs/3.55.2/Phaser.GameObjects.Arc (object collision method)
 export function DrawSector(graphics: Phaser.GameObjects.Graphics, sector: Sector) {
     graphics.clear();

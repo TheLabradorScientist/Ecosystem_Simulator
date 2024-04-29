@@ -5,11 +5,12 @@ import { Characteristics } from "../interfaces/characteristics";
 import { Detector } from "../interfaces/detector";
 import { Head, Limbs, NewTorso, NewHead, NewLimbs, NewTail, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts } from "./body-parts";
 
-export class Organism extends Phaser.GameObjects.Group {
+export class Organism extends Phaser.GameObjects.GameObject {
     private head: Head;
     private torso: Torso;
     private limbs: Limbs;
     private tail: Tail;
+    drawnParts: Phaser.GameObjects.Group;
     private parts: Map<Part, Trait>;
     private hunger: number;
 
@@ -18,7 +19,7 @@ export class Organism extends Phaser.GameObjects.Group {
 
     private age: number;
     private characteristics: Characteristics;
-    private target: Target | null;
+    private target: Target;
     private targetLock: boolean;
 
     detector: Detector;
@@ -31,13 +32,14 @@ export class Organism extends Phaser.GameObjects.Group {
     orientation: string;
 
     constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, orientation: string, bounds: Phaser.Geom.Rectangle) {
-		super(scene);
+		super(scene, 'sprite');
         this.sceneBounds = bounds;
 		this.rect = rect;
 		this.orientation = orientation;
         this.rect.setRotation(orientationMap.get(this.orientation));
 		// Phaser.GameObjects.Components.Transform.rotation -- use for orienting organisms
 
+        this.drawnParts = new Phaser.GameObjects.Group(this.scene);
         this.head = NewHead(this.rect);
         this.torso = NewTorso(this.rect);
         this.limbs = NewLimbs(this.rect);
@@ -46,7 +48,7 @@ export class Organism extends Phaser.GameObjects.Group {
 
         this.hunger = 0;
         this.age = 0;
-        this.target = null;
+        this.target = {object: null, objectBounds: null, relationship: 0};
         this.targetLock = false;
 
         this.MapTraits(headParts, this.head.traits);
@@ -82,7 +84,7 @@ export class Organism extends Phaser.GameObjects.Group {
     }
 
     Act() {
-        if (this.target == null) {
+        if (this.target.object == null) {
             let rand = Phaser.Math.Between(0, 8);
             switch (rand) {
                 case 1:
@@ -103,14 +105,14 @@ export class Organism extends Phaser.GameObjects.Group {
                     break;
             }
         } else {
-            if (this.targetLock = false) {
+            if (this.targetLock == false) {
                 // Set target lock based on probability,
                 // definite lock if |relationship| > 5. 
                 // definite not if |relationship| < 2. 
                 if (Math.abs(this.target.relationship) + Phaser.Math.Between(4, 8) > 10) {
                       this.targetLock = true; 
                 } else {
-                    this.target = null;
+                    this.target = {object: null, objectBounds: null, relationship: 0};
                     return;
                 }
             }
@@ -121,6 +123,7 @@ export class Organism extends Phaser.GameObjects.Group {
             }
     
             this.Move();
+            //console.log(this.targetLock, ' locked on ', this.target.object)
         }
     }
 
@@ -162,16 +165,6 @@ export class Organism extends Phaser.GameObjects.Group {
         this.energy--;
     }
 
-    Sense(object: Phaser.GameObjects.GameObject) {     
-        if (object != null) {
-            if (typeof object == typeof Phaser.GameObjects.Image) {
-                this.checkIfFood(object);
-            } else if (typeof object == typeof Organism) {
-                this.checkIfPredator(object);
-            }
-        }
-    }
-
     Eat() {
         this.hunger = 0;
         this.energy = this.characteristics.metabolism;
@@ -201,25 +194,52 @@ export class Organism extends Phaser.GameObjects.Group {
                 trait.rect.x, trait.x = this.rect.x;
                 trait.rect.y, trait.y = this.rect.y;
                 trait.rotation = this.rect.rotation;
-                this.add(this.scene.add.existing(trait));
+                this.drawnParts.add(this.scene.add.existing(trait));
             }
         })
-        this.detector.arc = DrawSector(this.detector.arc, this.detector.sector)
+        this.detector.sectorGraphic = DrawSector(this.detector.sectorGraphic, this.detector.sector)
     }
-    
-    checkIfFood(obj: Phaser.GameObjects.GameObject): boolean {
-        if (typeof obj == typeof Phaser.GameObjects.Image) {
-            
+
+    Sense(object: null | Phaser.GameObjects.Image | Organism) {     
+        if (object != null) {
+            let objectBounds: Phaser.Geom.Rectangle;
+            if (object instanceof Organism) {
+                objectBounds = object.rect.getBounds();
+                if (this.checkIfPredator(object)) {
+                    let rel = -10; // TODO: calculate
+                    if (Math.abs(rel) > this.target.relationship) {
+                        this.target = {object: object, objectBounds: objectBounds, relationship: rel};
+                    }
+                    return;
+                }
+            } else {
+                objectBounds = object.getBounds();
+            }
+            if (this.checkIfFood(object)) {
+                let rel = +10; // TODO: calculate
+                    if (Math.abs(rel) > this.target.relationship) {
+                        this.target = {object: object, objectBounds: objectBounds, relationship: rel};
+                    }
+                    return;
+            }
+        }
+    }
+
+    checkIfFood(obj: Phaser.GameObjects.Image | Organism): boolean {
+        if (obj instanceof Phaser.GameObjects.Image) {
+            this.detector.detectedObjects.shift()
             return true;   
         }
-        return true;
+        return false;
 
-        //if checkIfFood => true, then set target with + relationship, dependent
+        // if checkIfFood => true, then set target with + relationship, dependent
         // on hunger. Lower hunger = closer to neutral (0). If prey = other
         // organism, then check relative strength and weigh against hunger.
     }
 
-    checkIfPredator(obj: Phaser.GameObjects.GameObject): boolean {
+    checkIfPredator(obj: Organism): boolean {
+        
+        this.detector.detectedObjects.shift()
         return true;
 
         //if checkIfPredator => true, then set target with - relationship,
@@ -230,7 +250,8 @@ export class Organism extends Phaser.GameObjects.Group {
     }
 
     Die() {
-        this.destroy(true, true);
+        this.drawnParts.destroy(true, true);
+        this.destroy(true);
     }
 
     toString(): string {
