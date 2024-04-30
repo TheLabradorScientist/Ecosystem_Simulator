@@ -12,6 +12,8 @@ export class Organism extends Phaser.GameObjects.GameObject {
     private tail: Tail;
     drawnParts: Phaser.GameObjects.Group;
     private parts: Map<Part, Trait>;
+    private size: number;
+    private color: number;
     private hunger: number;
 
     private energy: number; // Determines the probability that the organism will move.
@@ -36,7 +38,15 @@ export class Organism extends Phaser.GameObjects.GameObject {
         this.sceneBounds = bounds;
 		this.rect = rect;
 		this.orientation = orientation;
+
+        this.color = 0xFFFFFF; // TODO: Should be used to scale the organism's base color
+        // Size 0 = 80 x 80
+        this.size = Phaser.Math.Between(-5, 5); // Might be edited later to implement age
+                                                // Max size at a certain age, until which
+                                                // the organism keeps growing larger.
+
         this.rect.setRotation(orientationMap.get(this.orientation));
+        this.rect.setScale(1 + (this.size/20));
 		// Phaser.GameObjects.Components.Transform.rotation -- use for orienting organisms
 
         this.drawnParts = new Phaser.GameObjects.Group(this.scene);
@@ -121,22 +131,34 @@ export class Organism extends Phaser.GameObjects.GameObject {
                     return;
                 }
             }
+
+            let rectBounds = this.rect.getBounds();
+
             if (this.target.relationship > 0) {
+                // Approach food
                 this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.target.objectBounds));
+                if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) > 20) || (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) > 20)) {
+                    this.Move();
+                    //console.log(this.targetLock, ' locked on ', this.target.relationship)
+                    //console.log("Organism coordinates: ", this.rect.x, this.rect.y);   
+                } else {
+                    this.Eat();
+                    this.target = {object: null, objectBounds: null, relationship: 0};
+                    this.targetLock = false;
+                }
             } else { // relationship < 0
+                // Flee from predator
                 this.TurnTo(oppositeOrientation.get(GetRelativePosition(this.rect.getBounds(), this.target.objectBounds)));
+                if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) < 240) || (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) < 240)) {
+                    this.Move();
+                    //console.log(this.targetLock, ' locked on ', this.target.relationship)
+                    //console.log("Organism coordinates: ", this.rect.x, this.rect.y);   
+                } else {
+                    this.target = {object: null, objectBounds: null, relationship: 0};
+                    this.targetLock = false;
+                }
             }
             
-            let rectBounds = this.rect.getBounds();
-            if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) > 20) || (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) > 20)) {
-                this.Move();
-                //console.log(this.targetLock, ' locked on ', this.target.relationship)
-                //console.log("Organism coordinates: ", this.rect.x, this.rect.y);   
-            } else {
-                this.Eat();
-                this.target = {object: null, objectBounds: null, relationship: 0};
-                this.targetLock = false;
-            }
         }
     }
 
@@ -209,7 +231,10 @@ export class Organism extends Phaser.GameObjects.GameObject {
                 trait.x = this.rect.x;
                 trait.rect.y = this.rect.y;
                 trait.y = this.rect.y;
+
                 trait.rotation = this.rect.rotation;
+                trait.scale = trait.rect.scale;
+                
                 this.drawnParts.add(this.scene.add.existing(trait));
             }
         })

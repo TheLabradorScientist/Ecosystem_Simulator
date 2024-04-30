@@ -1,9 +1,11 @@
-import { Trait, build, ears, extremity, eyes, forelimbShape, gut, hindlimbShape, nose, patterns, size, skin, tail, teeth } from "./trait";
+import { Trait, build, ears, extremity, eyes, forelimbShape, gut, hindlimbShape, nose, patterns, skin, tail, teeth } from "./trait";
 import { Randomize } from "../helpers/geometry";
 
 export const limbParts = ["Forelimb", "Hindlimb", "Extremity"];
 
-export interface Part {}
+export interface Part {
+	//traits: 		Trait[]; Tail does not have array...
+}
 
 export interface Limbs extends Part {
 	traits:        Trait[]
@@ -82,12 +84,11 @@ export function headToString(h: Head): string {
 		"Ears: ", h.ears.name].join(" ")
 };
 
-export const torsoParts = ["Build", "Size", "Patterns", "Skin", "Gut"];
+export const torsoParts = ["Build", "Patterns", "Skin", "Gut"];
 
 export interface Torso extends Part {
 	traits:   Trait[]
 	build:    Trait
-	size:     Trait
 	patterns: Trait
 	skin:     Trait
 	gut:      Trait
@@ -95,14 +96,12 @@ export interface Torso extends Part {
 
 export function NewTorso(rect: Phaser.GameObjects.Rectangle): Torso {
 	let newBuild = new Trait({ scene: rect.scene, texture: Randomize(build), rect: rect });
-	let newSize = new Trait({ scene: rect.scene, texture: Randomize(size), rect: rect });
 	let newPatterns = new Trait({ scene: rect.scene, texture: Randomize(patterns), rect: rect });
 	let newSkin = new Trait({ scene: rect.scene, texture: Randomize(skin), rect: rect });
 	let newGut = new Trait({ scene: rect.scene, texture: Randomize(gut), rect: rect });
-	let traitsArray = [newBuild, newSize, newPatterns, newSkin, newGut];
+	let traitsArray = [newBuild, newPatterns, newSkin, newGut];
 	return {
 		build:    newBuild,
-		size:     newSize,
 		patterns: newPatterns,
 		skin:     newSkin,
 		gut:      newGut,
@@ -112,7 +111,6 @@ export function NewTorso(rect: Phaser.GameObjects.Rectangle): Torso {
 
 export function torsoToString(t: Torso): string {
 	return ["Build: ", t.build.name, " / ",
-		"Size: ", t.size.name, " / ",
 		"Patterns: ", t.patterns.name, " / ",
 		"Exterior: ", t.skin.name, " / ",
 		"Digestive System: ", t.gut.name].join(" ")

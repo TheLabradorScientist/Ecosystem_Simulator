@@ -37,7 +37,7 @@ export const ears  = ["no external ears", "forward, triangular ears", "large, mo
 // tusks ? horns ? antlers ? - all increase visibility 
 
 export const build    = ["lithe", "bulky", "average"];         // Drawn
-export const size     = ["small", "medium", "large"];          // Applied to image using size factor. May be replaced with rand number generation -10 to 10.
+//export const size     = ["small", "medium", "large"];          // Applied to image using size factor. May be replaced with rand number generation -10 to 10.
 export const patterns = ["stripes", "spots", "plain"];       5  /// Stripes blend with grass, spots blend with forest // Drawn
 export const skin     = ["skin", "scales", "feathers", "fur"]; // Wings -> feathers
 export const gut      = ["short, simple", "long, chambered"];

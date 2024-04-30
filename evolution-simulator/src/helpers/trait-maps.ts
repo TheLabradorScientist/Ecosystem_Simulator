@@ -2,7 +2,7 @@
 
 // FOCUS ON TETRAPODS
 // HEAD - Grouping of traits: teeth, eyes, ears, face/nose (teeth impact diet, others impact detection ability)
-// BODY - Grouping of traits: build, size, patterns, digestion (digestion impacts diet, others impact visibility/camouflage, speed, strength/defense/offense)
+// BODY - Grouping of traits: build, patterns, digestion (digestion impacts diet, others impact visibility/camouflage, speed, strength/defense/offense)
 //   Scales->increase water mobility, feathers->increase air mobility, decrease strength,
 //   fur->increase strength, skin->decrease strength, increase energy/speed
 

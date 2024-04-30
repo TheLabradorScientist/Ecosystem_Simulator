@@ -27,12 +27,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     createTree(x: number, y: number): void {
-        const tree = this.add.image(x*80, (y*80)-10, 'treeBg');
+        const tree = this.add.image(x*80, (y*80)-20, 'treeBg');
+        tree.scale = 1.2;
         this.trees.add(tree);
     }
 
     createBerry(x: number, y: number): void {
-        const berry = this.add.image(x*80, (y*80)+15, 'berrySource');
+        const berry = this.add.image(x*80, (y*80)+25, 'berrySource');
         this.berries.add(berry);
     }
 
