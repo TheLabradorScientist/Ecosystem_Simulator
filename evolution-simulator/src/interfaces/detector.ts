@@ -22,15 +22,17 @@ export class Detector {
     CollisionDetected(otherObject: Phaser.GameObjects.Image | Organism, otherBounds: Phaser.Geom.Rectangle): Phaser.GameObjects.Image | Organism | null {
         const arcBounds = new Phaser.Geom.Circle(this.sector.center.x, this.sector.center.y, this.sector.radius)
         if (Phaser.Geom.Intersects.CircleToRectangle(arcBounds, otherBounds)) {
+            //console.log(true)
             let intersect_points: Phaser.Geom.Point[] = Phaser.Geom.Intersects.GetCircleToRectangle(arcBounds, otherBounds);
             let arc_points: Phaser.Geom.Point[] = [];
             let arc_sa = this.sector.orientation - (this.sector.percent*Math.PI);
             let arc_ea = this.sector.orientation + (this.sector.percent*Math.PI);
-            for (let x = arc_sa; x < arc_ea; (x+=(Math.PI/16))) {
-                arc_points.push(Phaser.Geom.Circle.CircumferencePoint(arcBounds, x));
+            for (let n = arc_sa; n < arc_ea; (n+=(Math.PI/16))) {
+                //console.log(Phaser.Geom.Circle.CircumferencePoint(arcBounds, n).x, ', ', Phaser.Geom.Circle.CircumferencePoint(arcBounds, n).y)
+                arc_points.push(Phaser.Geom.Circle.CircumferencePoint(arcBounds, n));
             }
 
-            const tolerance = 0.01
+            const tolerance = 1
             if (intersect_points.some(point => arc_points.some(
                 arcPoint => Math.abs(arcPoint.x - point.x) <= tolerance 
                 && Math.abs(arcPoint.y - point.y) <= tolerance))) {

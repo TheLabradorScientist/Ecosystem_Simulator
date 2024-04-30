@@ -11,18 +11,18 @@ export class Button extends Phaser.GameObjects.Sprite {
         this.setDisplaySize(this.width, this.height);
         this.setupEventListeners();
 
-        this.scene.add.image(this.x, this.y, this.name);
+        this.scene.add.existing(this);
 
         this.scene;
     }
 
     private setupEventListeners() {
-        this.on('pointerover', () => {
-            this.scene.add.image(this.x, this.y, this.name);
+        this.on('pointerover', (pointer: Phaser.Input.Pointer) => {
+            this.setAlpha(0.5)
             //console.log('over')
         })
         this.on('pointerout', () => {
-            this.scene.add.image(this.x, this.y, this.name);
+            this.setAlpha(1)
             //console.log('out')
         })
     }

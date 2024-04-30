@@ -1,6 +1,9 @@
 import { RandomOrientation } from "../helpers/geometry";
 import { Organism } from "../objects/organism";
 
+// Organism count: determined by main screen input
+export var POPCOUNT: number = 4;
+
 export class GameScene extends Phaser.Scene {
     // Tile map stuff
     private map: Phaser.Tilemaps.Tilemap;
@@ -77,7 +80,7 @@ export class GameScene extends Phaser.Scene {
             })
         })
 
-        for (let x=0; x < 5; x++) {
+        for (let x=0; x < POPCOUNT; x++) {
             let newX = Phaser.Math.Between(0, window.innerWidth);
             let newY = Phaser.Math.Between(0, window.innerHeight);
             let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80), 
@@ -171,14 +174,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     update() {
+        this.setOrgDepth();
         this.population.forEach((org: Organism) => {  
             if (Phaser.Math.Between(0, 5) == 5) {    
                 org.Act();
-                org.Draw();
             }
+            org.Draw();
         })   
-        
-        this.setOrgDepth();
     }
 }
 
