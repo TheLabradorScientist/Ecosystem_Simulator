@@ -1,5 +1,5 @@
-import { Button } from "../interfaces/basicButton";
-import { Slider } from "../interfaces/basicSlider";
+import { Button } from "../objects/basicButton";
+import { Slider } from "../objects/basicSlider";
 
 export class MenuScene extends Phaser.Scene {
     private title: Phaser.GameObjects.Text;
@@ -20,22 +20,22 @@ export class MenuScene extends Phaser.Scene {
     }
 
     init(): void {
-        this.title = this.add.text(100, 100, 'Evolution \nSimulator ', { fontFamily: 'Lugrasimo', fontSize: 80, color: '#80ff40' }).setShadow(6, 8, '#005555', 7, false, true);
-        this.startButton = new Button({scene: this, texture: 'genButton', rect: new Phaser.GameObjects.Rectangle(this, 350, 500)})
+        this.title = this.add.text(100, 100, 'Evolution \nSimulator ', 
+            { fontFamily: 'Lugrasimo', fontSize: 80, color: '#80ff40' 
+            }).setShadow(6, 8, '#005555', 7, false, true);
+
+        this.startButton = new Button({scene: this, texture: 'genButton', rect: new Phaser.GameObjects.Rectangle(this, 350, 500)}, startScene)
         
-        this.startButton.on('pointerdown', () => {
-            this.scene.start('GameScene');
-        })
         this.popSlider = new Slider({scene: this, texture: 'popSlider', rect: new Phaser.GameObjects.Rectangle(this, 750, 400, 500, 50, 0xffffff, 0.5)})
     }
 
     create(): void {
-        
-
     }
 
     update(): void {}
+}
 
-
-    
+function startScene(): () => any {    
+    this.scene.scene.start('GameScene');
+    return;
 }

@@ -1,4 +1,5 @@
 import { RandomOrientation } from "../helpers/geometry";
+import { Population } from "../interfaces/population";
 import { Organism } from "../objects/organism";
 
 // Organism count: determined by main screen input
@@ -14,13 +15,15 @@ export class GameScene extends Phaser.Scene {
     private trees: Phaser.GameObjects.Group;
     private berries: Phaser.GameObjects.Group;
     private waterBodies: Phaser.GameObjects.Group;
-    private population: Organism[];
+    private populations: Population[];
+    private allLiving: Organism[];
 
     constructor() {
         super({
             key: 'GameScene'
         })
-        this.population = [];
+        this.populations = [];
+        this.allLiving = [];
     }
 
     init(): void {
@@ -82,12 +85,15 @@ export class GameScene extends Phaser.Scene {
         })
 
         for (let x=0; x < POPCOUNT; x++) {
+            let newPop: Population = {phenotypeMap: new Map(), livingIndividuals: []};
             let newX = Phaser.Math.Between(0, window.innerWidth);
             let newY = Phaser.Math.Between(0, window.innerHeight);
-            let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80), 
-                RandomOrientation(), new Phaser.Geom.Rectangle(0, 0, window.innerWidth, window.innerHeight));
-            this.population[x] = org;
-            this.population[x].Draw();
+            let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80),
+                new Phaser.Geom.Rectangle(0, 0, window.innerWidth, window.innerHeight));
+            newPop.livingIndividuals[0] = org;
+            newPop.livingIndividuals[0].Draw();
+            this.allLiving.push(newPop.livingIndividuals[0]);
+            this.populations[x] = newPop;
             //console.log(this.population[x].toString())
         }
 
@@ -101,7 +107,7 @@ export class GameScene extends Phaser.Scene {
 
     // Set up depth of organisms on screen based on collision/overlap detection.
     setOrgDepth() {
-        this.population.forEach((org: Organism) => {
+        this.allLiving.forEach((org: Organism) => {
 
             // Set default organism and detector depth.
             org.drawnParts.setDepth(2);
@@ -139,7 +145,7 @@ export class GameScene extends Phaser.Scene {
 
             // Set up organism sensing other organisms.
             //var orgColliders: Phaser.GameObjects.GameObject[] = [];
-            this.population.forEach((org2: Organism) => {
+            this.allLiving.forEach((org2: Organism) => {
                 const orgBounds = org2.rect.getBounds();
                 let obj = org.detector.CollisionDetected(org2, orgBounds);
                 if (obj != null) {
@@ -163,7 +169,7 @@ export class GameScene extends Phaser.Scene {
             // Change organism depth if collision detected, 
             if (collisionDetected) {
                 // If organism is below collision object, set to bottom layer
-                if (org.rect.getBounds().centerY > collidedWith.getBounds().centerY) {
+                if (org.rect.getBounds().centerY > collidedWith.getBounds().centerY+25) {
                     org.drawnParts.setDepth(3);
                     org.detector.sectorGraphic.setDepth(3);
                 } else { // If organism is above collision object, set to top layer
@@ -176,10 +182,9 @@ export class GameScene extends Phaser.Scene {
 
     update() {
         this.setOrgDepth();
-        this.population.forEach((org: Organism) => {  
-            if (Phaser.Math.Between(0, 5) == 5) {    
-                org.Act();
-            }
+        this.allLiving.forEach((org: Organism) => {     
+            org.Act();
+            org.Update();
             org.Draw();
         })   
     }

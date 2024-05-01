@@ -15,7 +15,7 @@ export class Detector {
         DrawSector(this.sectorGraphic, this.sector);
     }
 
-    // Want to call this in update function so it constantly checks if any external
+    // Call this in update function so it constantly checks if any external
     // object overlaps and returns the object(s) if so, else returns null.
     // Also change orientation of the organism based on the feedback
     // of the detected object: neutral / move toward / move away

@@ -47,8 +47,8 @@ export function NewLimbs(rect: Phaser.GameObjects.Rectangle): Limbs {
 };
 
 export function limbsToString(l: Limbs): string {
-	return ["Forelimb: ", l.forelimbShape.name, " / ",
-		"Hindlimb: ", l.hindlimbShape.name, " / ",
+	return ["Forelimb: ", l.forelimbShape.name, " \n+ ",
+		"Hindlimb: ", l.hindlimbShape.name, " \n+ ",
 		"Extremity: ", l.extremity.name].join(" ");
 };
 
@@ -78,9 +78,9 @@ export function NewHead(rect: Phaser.GameObjects.Rectangle): Head {
 };
 
 export function headToString(h: Head): string {
-	return ["Teeth: ", h.teeth.name, " / ",
-		"Eyes: ", h.eyes.name, " / ",
-		"Facial Structure: ", h.nose.name, " / ",
+	return ["Teeth: ", h.teeth.name, " \n+ ",
+		"Eyes: ", h.eyes.name, " \n+ ",
+		"Facial Structure: ", h.nose.name, " \n+ ",
 		"Ears: ", h.ears.name].join(" ")
 };
 
@@ -110,9 +110,9 @@ export function NewTorso(rect: Phaser.GameObjects.Rectangle): Torso {
 };
 
 export function torsoToString(t: Torso): string {
-	return ["Build: ", t.build.name, " / ",
-		"Patterns: ", t.patterns.name, " / ",
-		"Exterior: ", t.skin.name, " / ",
+	return ["Build: ", t.build.name, " \n+ ",
+		"Patterns: ", t.patterns.name, " \n+ ",
+		"Exterior: ", t.skin.name, " \n+ ",
 		"Digestive System: ", t.gut.name].join(" ")
 };
 

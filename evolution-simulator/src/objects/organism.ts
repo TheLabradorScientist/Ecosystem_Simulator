@@ -4,6 +4,7 @@ import { detectionTraits, dietTraits, mobilityTraits, speedTraits, strengthTrait
 import { Characteristics } from "../interfaces/characteristics";
 import { Detector } from "../interfaces/detector";
 import { Head, Limbs, NewTorso, NewHead, NewLimbs, NewTail, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts } from "./body-parts";
+import { Info } from "./basicInfo";
 
 export class Organism extends Phaser.GameObjects.GameObject {
     private head: Head;
@@ -23,6 +24,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
     private characteristics: Characteristics;
     private target: Target;
     private targetLock: boolean;
+    private info: Info;
 
     detector: Detector;
     
@@ -33,13 +35,13 @@ export class Organism extends Phaser.GameObjects.GameObject {
     rect: Phaser.GameObjects.Rectangle;
     orientation: string;
 
-    constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, orientation: string, bounds: Phaser.Geom.Rectangle) {
+    constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, bounds: Phaser.Geom.Rectangle) {
 		super(scene, 'sprite');
         this.sceneBounds = bounds;
 		this.rect = rect;
-		this.orientation = orientation;
+		this.orientation = RandomOrientation();
 
-        this.color = 0xFFFFFF; // TODO: Should be used to scale the organism's base color
+        this.color = 0xffffff; // TODO: Should be used to scale the organism's base color
         // Size 0 = 80 x 80
         this.size = Phaser.Math.Between(-5, 5); // Might be edited later to implement age
                                                 // Max size at a certain age, until which
@@ -71,20 +73,42 @@ export class Organism extends Phaser.GameObjects.GameObject {
         this.characteristics.visibility = this.CalculateCharacteristic(visibilityTraits);
         this.characteristics.detection = this.CalculateCharacteristic(detectionTraits);
         this.characteristics.mobility = this.CalculateCharacteristic(mobilityTraits);
-        this.characteristics.speed = this.CalculateCharacteristic(speedTraits);
+
+        // Medium sized animals are the fastest
+        this.characteristics.speed = this.CalculateCharacteristic(speedTraits) + (5-Math.abs(this.size));
+
         this.characteristics.strength = this.CalculateCharacteristic(strengthTraits);
 
         this.energy = this.characteristics.metabolism;
 
         this.detector = new Detector(this.rect, this.characteristics.detection);
 
+        this.rect.setInteractive();
         this.scene.add.existing(this);
+
+        this.setupEventListeners();
+        this.info = new Info({ 
+            scene: this.scene, texture: 'info', 
+            rect: new Phaser.GameObjects.Rectangle(this.scene, 400, 300, 400, 500)}, 
+            this.toString()).setVisible(false).setDepth(5);
+    }
+    private setupEventListeners() {
+        this.rect.on('pointerdown', () => {
+            this.info.infoText = this.toString();
+            this.info.setVisible(true);
+            this.info.infoDisplay.text = this.info.infoText;
+            this.info.infoDisplay.setVisible(true);
+            //console.log(true)
+        })
     }
 
-    Update() {
-        this.hunger++;
-        this.age++;
 
+    Update() {
+        this.hunger+=0.05;
+        this.age++;
+        if (this.hunger >= this.characteristics.metabolism) {
+            //this.Die();
+        }
     }
 
     TurnTo(orient: string) {
@@ -95,24 +119,27 @@ export class Organism extends Phaser.GameObjects.GameObject {
 
     Act() {
         if (this.target.object == null) {
-            let rand = Phaser.Math.Between(0, 8);
-            switch (rand) {
-                case 1:
-                    this.TurnTo(RandomOrientation());
-                    break;
-                case 2:
-                    return; 
-                default:
-                    if (this.rect.x <= 0 || this.rect.y <= 0 || this.rect.x >= this.sceneBounds.width || this.rect.y >= this.sceneBounds.height ) {
-                        this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.sceneBounds));
-                    }
-                    this.Move();
+            let rand = Phaser.Math.Between(0, 60);
+            if (rand < 2) {
+                this.TurnTo(RandomOrientation());
+                if (this.hunger < this.characteristics.metabolism*3/4 && this.energy < this.characteristics.metabolism) {
+                    this.energy++;
+                }
+            } else if (rand < 10) {
+                if (this.rect.x <= 0 || this.rect.y <= 0 || this.rect.x >= this.sceneBounds.width || this.rect.y >= this.sceneBounds.height ) {
+                    this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.sceneBounds));
+                }
+                this.Move();
 
-                    // IDEA: Alternative function GetUnstuck() sets organism's target
-                    // to the center of the scene (sceneBounds centerX, center Y) &
-                    // results in organism moving to center until no longer offscreen.
-                    // Target = sceneBounds, relationship = +10
-                    break;
+                // IDEA: Alternative function GetUnstuck() sets organism's target
+                // to the center of the scene (sceneBounds centerX, center Y) &
+                // results in organism moving to center until no longer offscreen.
+                // Target = sceneBounds, relationship = +10
+            } else {
+                if (this.hunger < this.characteristics.metabolism*3/4 && this.energy < this.characteristics.metabolism) {
+                    this.energy++;
+                }
+                return; 
             }
         } else {
             if (this.targetLock == false) {
@@ -137,7 +164,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
             if (this.target.relationship > 0) {
                 // Approach food
                 this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.target.objectBounds));
-                if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) > 20) || (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) > 20)) {
+                if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) > 80) || (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) > 80)) {
                     this.Move();
                     //console.log(this.targetLock, ' locked on ', this.target.relationship)
                     //console.log("Organism coordinates: ", this.rect.x, this.rect.y);   
@@ -164,7 +191,14 @@ export class Organism extends Phaser.GameObjects.GameObject {
 
     Move() {
         // Maybe make movement affected by energy
-        const movement = 10 + this.characteristics.speed/2;
+        //console.log(this.energy, "/", this.characteristics.metabolism, "=", this.energy/this.characteristics.metabolism );
+        const movement = (10 + this.characteristics.speed/2)* this.energy/this.characteristics.metabolism;
+        if (movement < 0) {            
+            if (this.hunger < this.characteristics.metabolism*3/4 && this.energy < this.characteristics.metabolism) {
+                this.energy++;
+            }
+            return;
+        }
         switch (this.orientation) {
         case "north":
             this.rect.y -= movement;
@@ -197,8 +231,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         }
         this.detector.sector.center.x = this.rect.x;
         this.detector.sector.center.y = this.rect.y;
-        this.energy--;
-        this.hunger++
+        this.energy-=0.25;
     }
 
     Eat() {
@@ -225,6 +258,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
             this.limbs.hindlimbShape, this.limbs.extremity, 
             this.tail.tail, this.head.nose, this.head.ears, 
             this.head.eyes, this.torso.patterns];
+
         drawnTraits.forEach((trait: Trait) => {
             if (trait.isDrawable) {
                 trait.rect.x = this.rect.x;
@@ -238,6 +272,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
                 this.drawnParts.add(this.scene.add.existing(trait));
             }
         })
+
         this.detector.sectorGraphic = DrawSector(this.detector.sectorGraphic, this.detector.sector)
     }
 
@@ -259,7 +294,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
                 objectBounds = object.getBounds();
             }
             if (this.checkIfFood(object)) {
-                console.log("Hunger probability: ", this.hunger/this.characteristics.metabolism)
+                //console.log("Hunger probability: ", this.hunger/this.characteristics.metabolism)
                 let temp = this.hunger/this.characteristics.metabolism
                 if (temp < 0.5) {temp = 0}
                 let rel = (temp)*10; // TODO: calculate
@@ -313,14 +348,28 @@ export class Organism extends Phaser.GameObjects.GameObject {
         return ["ORGANISM:\n{ (HEAD):", headToString(this.head),
             "}\n{ (TORSO): ", torsoToString(this.torso), "}\n{",
             "(LIMBS): ", limbsToString(this.limbs), "}\n{",
-            "(TAIL): ", tailToString(this.tail), " }\n{",
-            "(ORIENTATION): ", this.orientation, "}",
-            "}\n{ (CHARACTERISTICS): Diet =", this.characteristics.diet,
-            " / Metabolism =", this.characteristics.metabolism,
-            " / Visibility =", this.characteristics.visibility,
-            " / Detection =", this.characteristics.detection,
-            " / Mobility =", this.characteristics.mobility,
-            " / Speed =", this.characteristics.speed,
-            " / Strength =", this.characteristics.strength, "}"].join(" ");
+            "(TAIL): ", tailToString(this.tail), " }",
+            "\n{ (CHARACTERISTICS): \n+ Diet =", this.dietString(this.characteristics.diet),
+            " \n+ Metabolism =", this.characteristics.metabolism,
+            " \n+ Visibility =", this.characteristics.visibility,
+            " \n+ Detection =", this.characteristics.detection,
+            " \n+ Mobility =", this.characteristics.mobility,
+            " \n+ Size =", ((6 + this.size)*4/5), "ft",
+            " \n+ Top Speed =", (40 + (this.characteristics.speed*3)), "mph",
+            " \n+ Strength =", this.characteristics.strength, "}"].join(" ");
+    }
+
+    dietString(diet: number): string {
+        if (diet < -7) {
+            return "Obligate carnivore";
+        } else if (diet < -3) {
+            return "Facultative carnivore";
+        } else if (diet > 7) {
+            return "Obligate herbivore";
+        } else if (diet > 3) {
+            return "Facultative herbivore";
+        } else {
+            return "True omnivore";
+        }
     }
 }
