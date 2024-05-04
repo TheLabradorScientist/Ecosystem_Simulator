@@ -1,6 +1,10 @@
 import { Organism } from "../objects/organism";
 
 export interface Population {
+
+    // Unique ID
+    id: number,
+
     // Map containing all unique individuals in population 
     // Each key = organism with unique set of traits.
     // Each value = # of organisms with the phenotype.
@@ -10,4 +14,6 @@ export interface Population {
 
     // Array of all living organisms in the population.
     livingIndividuals: Organism[],
+
+    updateNeeded: boolean
 }

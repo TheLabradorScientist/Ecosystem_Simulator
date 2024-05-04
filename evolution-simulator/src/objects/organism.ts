@@ -3,28 +3,39 @@ import { DrawSector, GetRelativePosition, RandomOrientation, Target, oppositeOri
 import { detectionTraits, dietTraits, mobilityTraits, speedTraits, strengthTraits, visibilityTraits } from "../helpers/trait-maps";
 import { Characteristics } from "../interfaces/characteristics";
 import { Detector } from "../interfaces/detector";
-import { Head, Limbs, NewTorso, NewHead, NewLimbs, NewTail, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts } from "./body-parts";
+import { Head, Limbs, Part, Tail, Torso, torsoToString, headToString, limbsToString, tailToString, headParts, torsoParts, limbParts, CloneLimbs, CloneHead, CloneTorso, CloneTail } from "./body-parts";
 import { Info } from "./basicInfo";
+import { Food, Plant } from "../interfaces/food";
+import { populationMap } from "../scenes/game-scene";
+import { CloneOrganism } from "../helpers/organism-builders";
 
-export class Organism extends Phaser.GameObjects.GameObject {
-    private head: Head;
-    private torso: Torso;
-    private limbs: Limbs;
-    private tail: Tail;
-    drawnParts: Phaser.GameObjects.Group;
-    private parts: Map<Part, Trait>;
-    private size: number;
-    private color: number;
+export class Organism extends Phaser.GameObjects.GameObject implements Food { 
+    head: Head;
+    torso: Torso;
+    limbs: Limbs;
+    tail: Tail;
+    phenotype: Map<Part, Trait>;
+    
     private hunger: number;
-
     private energy: number; // Determines the probability that the organism will move.
-            // Recovered over time if hunger < 3/4 metabolism. Max = metabolism value.
-
+    // Recovered over time if hunger < 3/4 metabolism. Max = metabolism value.
     private age: number;
+    
+    size: number;
+    color: number;
+    drawnParts: Phaser.GameObjects.Group;
+    populationID: number;
+
     private characteristics: Characteristics;
     private target: Target;
     private targetLock: boolean;
     private info: Info;
+    private canMate: boolean;
+    status: number;
+
+    // As food
+    nutritionCap: number;
+    currNutrition: number;
 
     detector: Detector;
     
@@ -35,38 +46,46 @@ export class Organism extends Phaser.GameObjects.GameObject {
     rect: Phaser.GameObjects.Rectangle;
     orientation: string;
 
-    constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, bounds: Phaser.Geom.Rectangle) {
+    constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, bounds: Phaser.Geom.Rectangle,
+        popID: number, newColor: number, newSize: number, newHead: Head, newTorso: Torso, newLimbs: Limbs, newTail: Tail)
+    {
 		super(scene, 'sprite');
         this.sceneBounds = bounds;
 		this.rect = rect;
 		this.orientation = RandomOrientation();
+        this.populationID = popID;
+        this.canMate = false;
 
-        this.color = 0xffffff; // TODO: Should be used to scale the organism's base color
+        this.color = newColor; // TODO: Should be used to scale the organism's base color
         // Size 0 = 80 x 80
-        this.size = Phaser.Math.Between(-5, 5); // Might be edited later to implement age
-                                                // Max size at a certain age, until which
-                                                // the organism keeps growing larger.
+        this.size = newSize // Might be edited later to implement age
+                            // Max size at a certain age, until which
+                            // the organism keeps growing larger.
+
+        this.nutritionCap = 100 + (5*this.size);
+
+        this.currNutrition = this.nutritionCap;
 
         this.rect.setRotation(orientationMap.get(this.orientation));
         this.rect.setScale(1 + (this.size/20));
 		// Phaser.GameObjects.Components.Transform.rotation -- use for orienting organisms
 
         this.drawnParts = new Phaser.GameObjects.Group(this.scene);
-        this.head = NewHead(this.rect);
-        this.torso = NewTorso(this.rect);
-        this.limbs = NewLimbs(this.rect);
-        this.tail = NewTail(this.rect);
-        this.parts = new Map<Part, Trait>([])
+        this.head = newHead;
+        this.torso = newTorso;
+        this.limbs = newLimbs;
+        this.tail = newTail;
+        this.phenotype = new Map<Part, Trait>([])
 
         this.hunger = 0;
         this.age = 0;
-        this.target = {object: null, objectBounds: null, relationship: 0};
+        this.target = {object: null, objectBounds: null, relationship: 0, type: null};
         this.targetLock = false;
 
         this.MapTraits(headParts, this.head.traits);
         this.MapTraits(torsoParts, this.torso.traits);
         this.MapTraits(limbParts, this.limbs.traits);
-        this.parts.set("Tail", this.tail.tail);
+        this.phenotype.set("Tail", this.tail.tail);
         this.characteristics = {diet: 0, metabolism: 0, mobility: 0, visibility: 0, detection: 0, speed: 0, strength: 0}
         this.characteristics.diet = this.CalculateCharacteristic(dietTraits);
         this.characteristics.metabolism = 100;
@@ -85,6 +104,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
 
         this.rect.setInteractive();
         this.scene.add.existing(this);
+        this.status = 1;
 
         this.setupEventListeners();
         this.info = new Info({ 
@@ -92,6 +112,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
             rect: new Phaser.GameObjects.Rectangle(this.scene, 400, 300, 400, 500)}, 
             this.toString()).setVisible(false).setDepth(5);
     }
+
     private setupEventListeners() {
         this.rect.on('pointerdown', () => {
             this.info.infoText = this.toString();
@@ -102,12 +123,18 @@ export class Organism extends Phaser.GameObjects.GameObject {
         })
     }
 
-
     Update() {
         this.hunger+=0.05;
-        this.age++;
-        if (this.hunger >= this.characteristics.metabolism) {
-            //this.Die();
+        this.age+=0.01;
+        if (this.hunger > this.characteristics.metabolism) {
+            this.Die();
+        }
+
+        if (this.age > 150) {
+            this.Die();
+        }
+        if (this.canMate == false && this.age > 20 && Math.round(this.age % 20) == 0) {
+            this.canMate = true;
         }
     }
 
@@ -147,14 +174,10 @@ export class Organism extends Phaser.GameObjects.GameObject {
                 // definite lock if |relationship| > 5. 
                 // definite not if |relationship| < 2. 
                 if (Math.abs(this.target.relationship) + Phaser.Math.Between(4, 8) > 10) {
-                    if (this.target.relationship > 0) {
-                        console.log("Target locked: Food")  
-                    } else {
-                        console.log("Target locked: Predator");
-                    }
+                    console.log("Target locked: ", this.target.type)
                     this.targetLock = true; 
                 } else {
-                    this.target = {object: null, objectBounds: null, relationship: 0};
+                    this.target = {object: null, objectBounds: null, relationship: 0, type: null};
                     return;
                 }
             }
@@ -164,13 +187,27 @@ export class Organism extends Phaser.GameObjects.GameObject {
             if (this.target.relationship > 0) {
                 // Approach food
                 this.TurnTo(GetRelativePosition(this.rect.getBounds(), this.target.objectBounds));
-                if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) > 80) || (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) > 80)) {
+                if ((Math.abs(rectBounds.centerX - this.target.objectBounds.centerX) > 40) || 
+                (Math.abs(rectBounds.centerY - this.target.objectBounds.centerY) > 40)) {
                     this.Move();
                     //console.log(this.targetLock, ' locked on ', this.target.relationship)
                     //console.log("Organism coordinates: ", this.rect.x, this.rect.y);   
-                } else {
-                    this.Eat();
-                    this.target = {object: null, objectBounds: null, relationship: 0};
+                } else { // Reached food 
+                    if (this.target.type == 'food') {
+                        this.Eat();
+                    } else if (this.target.type == 'mate' && this.target.object instanceof Organism) {
+                        if (this.age > 20 && this.canMate == true && this.target.object.age > 20 && this.target.object.canMate == true) {
+                            // Could possibly randomize number of offspring - maybe 1-3
+                            let newOrg = CloneOrganism(this.scene, this.rect.x, this.rect.y, this);
+                            newOrg.status = 0;
+                            let pop = populationMap.get(this.populationID);
+                            pop.livingIndividuals.push(newOrg);
+                            console.log("STARTED");
+                            pop.updateNeeded = true;
+                            this.canMate = false;
+                        }
+                    }
+                    this.target = {object: null, objectBounds: null, relationship: 0, type: null};
                     this.targetLock = false;
                 }
             } else { // relationship < 0
@@ -181,7 +218,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
                     //console.log(this.targetLock, ' locked on ', this.target.relationship)
                     //console.log("Organism coordinates: ", this.rect.x, this.rect.y);   
                 } else {
-                    this.target = {object: null, objectBounds: null, relationship: 0};
+                    this.target = {object: null, objectBounds: null, relationship: 0, type: null};
                     this.targetLock = false;
                 }
             }
@@ -235,19 +272,29 @@ export class Organism extends Phaser.GameObjects.GameObject {
     }
 
     Eat() {
-        this.hunger = 0;
-        this.energy = this.characteristics.metabolism;
+        //this.target.object -- update function that reduces nutrition
+        if (this.target.object instanceof Plant || this.target.object instanceof Organism) {
+            if (this.hunger <= this.target.object.currNutrition) {
+                this.target.object.currNutrition -= this.hunger;
+                this.hunger = 0;
+            } else {
+                this.hunger -= this.target.object.currNutrition;
+                this.target.object.currNutrition = 0;
+            }
+        }
+        this.energy = this.characteristics.metabolism-this.hunger;
+        console.log("Target dropped: Food")
     }
 
     MapTraits(partType: string[], traits: Trait[]) {
         traits.forEach((trait: Trait, x: number) => {
-            this.parts.set(partType[x], trait);
+            this.phenotype.set(partType[x], trait);
         })
     }
 
     CalculateCharacteristic(reference: Map<string, number>): number {
         let value = 0
-        this.parts.forEach((trait: Trait) => {
+        this.phenotype.forEach((trait: Trait) => {
             value += reference.get(trait.name) || 0;
         })
         return value;
@@ -276,7 +323,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         this.detector.sectorGraphic = DrawSector(this.detector.sectorGraphic, this.detector.sector)
     }
 
-    Sense(object: null | Phaser.GameObjects.Image | Organism) {   
+    Sense(object: null | Phaser.GameObjects.Image | Plant | Organism) {   
         //console.log(this.detector.detectedObjects);  
         if (object != null) {
             let objectBounds: Phaser.Geom.Rectangle;
@@ -286,9 +333,14 @@ export class Organism extends Phaser.GameObjects.GameObject {
                     let rel = -10; // TODO: calculate
                     // Set your priorities in life >:)
                     if (Math.abs(rel) > this.target.relationship) {
-                        this.target = {object: object, objectBounds: objectBounds, relationship: rel};
+                        this.target = {object: object, objectBounds: objectBounds, relationship: rel, type: 'predator'};
                     }
                     return;
+                } else if (this.checkIfMate(object)) {
+                    let rel = +5;
+                    if (Math.abs(rel) > this.target.relationship) {
+                        this.target = {object: object, objectBounds: objectBounds, relationship: rel, type: 'mate'}
+                    }
                 }
             } else {
                 objectBounds = object.getBounds();
@@ -307,7 +359,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
                         this.target.relationship = rel;
                     } else {
                         // Else, set the target to the stronger priority
-                        this.target = {object: object, objectBounds: objectBounds, relationship: rel};
+                        this.target = {object: object, objectBounds: objectBounds, relationship: rel, type: 'food'};
                     }
                 }
                 return;
@@ -315,8 +367,8 @@ export class Organism extends Phaser.GameObjects.GameObject {
         }
     }
 
-    checkIfFood(obj: Phaser.GameObjects.Image | Organism): boolean {
-        if (obj instanceof Phaser.GameObjects.Image) {
+    checkIfFood(obj: Phaser.GameObjects.Image | Plant | Organism): boolean {
+        if (obj instanceof Plant) {
             this.detector.detectedObjects.shift()
             return true;   
         }
@@ -327,10 +379,23 @@ export class Organism extends Phaser.GameObjects.GameObject {
         // organism, then check relative strength and weigh against hunger.
     }
 
+
+    checkIfMate(obj: Organism): boolean {
+        if (obj.populationID == this.populationID && this.canMate == true) {
+            this.detector.detectedObjects.shift()
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     checkIfPredator(obj: Organism): boolean {
-        
-        this.detector.detectedObjects.shift()
-        return true;
+        if (obj.size > 2+this.size) {
+            this.detector.detectedObjects.shift()
+            return true;
+        } else {
+            return false;
+        }
 
         //if checkIfPredator => true, then set target with - relationship,
         // dependent on strength vs speed. Low speed, high strength
@@ -340,13 +405,18 @@ export class Organism extends Phaser.GameObjects.GameObject {
     }
 
     Die() {
+        let pop = populationMap.get(this.populationID);
+        this.status = -1;
+        pop.updateNeeded = true;
         this.drawnParts.destroy(true, true);
+        this.detector.sectorGraphic.destroy(true)
         this.destroy(true);
     }
 
     toString(): string {
-        return ["ORGANISM:\n{ (HEAD):", headToString(this.head),
-            "}\n{ (TORSO): ", torsoToString(this.torso), "}\n{",
+        return ["ORGANISM:\n [AGE] = ", Math.round(this.age),"DAYS \n",
+            "{ (HEAD):", headToString(this.head), "}\n{",
+            "(TORSO): ", torsoToString(this.torso), "}\n{",
             "(LIMBS): ", limbsToString(this.limbs), "}\n{",
             "(TAIL): ", tailToString(this.tail), " }",
             "\n{ (CHARACTERISTICS): \n+ Diet =", this.dietString(this.characteristics.diet),

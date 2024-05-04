@@ -13,7 +13,7 @@ export class Info extends Phaser.GameObjects.Rectangle {
         this.setDisplaySize(this.width, this.height);
         this.setupEventListeners();
         this.infoText = info;
-        this.infoDisplay = this.scene.add.text(this.x-170, this.y-220, this.infoText, { fontFamily: 'Times', fontSize: 18, color: '#55ff88' }).setVisible(false).setDepth(6);
+        this.infoDisplay = this.scene.add.text(this.x-170, this.y-230, this.infoText, { fontFamily: 'Times', fontSize: 18, color: '#55ff88' }).setVisible(false).setDepth(6);
         this.scene.add.existing(this);
 
     }

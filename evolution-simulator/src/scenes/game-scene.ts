@@ -1,9 +1,12 @@
-import { RandomOrientation } from "../helpers/geometry";
+import { RandomOrganism, CloneOrganism } from "../helpers/organism-builders";
+import { Plant } from "../interfaces/food";
 import { Population } from "../interfaces/population";
 import { Organism } from "../objects/organism";
 
 // Organism count: determined by main screen input
-export var POPCOUNT: number = 4;
+export var POPCOUNT: number = 3;
+export var POPSIZE: number = 2;
+export var populationMap = new Map<number, Population>();
 
 export class GameScene extends Phaser.Scene {
     // Tile map stuff
@@ -15,19 +18,16 @@ export class GameScene extends Phaser.Scene {
     private trees: Phaser.GameObjects.Group;
     private berries: Phaser.GameObjects.Group;
     private waterBodies: Phaser.GameObjects.Group;
-    private populations: Population[];
     private allLiving: Organism[];
 
     constructor() {
         super({
             key: 'GameScene'
         })
-        this.populations = [];
         this.allLiving = [];
     }
 
-    init(): void {
-    }
+    init(): void {}
 
     createTree(x: number, y: number): void {
         const tree = this.add.image(x*80, (y*80)-20, 'treeBg');
@@ -36,7 +36,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     createBerry(x: number, y: number): void {
-        const berry = this.add.image(x*80, (y*80)+25, 'berrySource');
+        let berry: Plant = new Plant({
+            scene: this, texture: 'berrySource', 
+            texture2: 'depleted_berrySource',
+            rect: new Phaser.GameObjects.Rectangle(this, (x*80), (y*80)+25)
+        })
         this.berries.add(berry);
     }
 
@@ -71,10 +75,10 @@ export class GameScene extends Phaser.Scene {
                     if (tile.index !== -1) {
                         if (Phaser.Math.Between(1, 5) === 1) {
                             this.createTree(tile.x, tile.y);
-                            if (Phaser.Math.Between(1, 5) === 1) {
+                            if (Phaser.Math.Between(1, 12) === 1) {
                                 this.createBerry(tile.x, tile.y);
                             }
-                        } else if (Phaser.Math.Between(1, 5) === 1) {
+                        } else if (Phaser.Math.Between(1, 7) === 1) {
                             this.createBerry(tile.x, tile.y);
                         } else if (Phaser.Math.Between(1, 3) == 1) {
                             this.createWaterBody(tile.x, tile.y);
@@ -85,16 +89,27 @@ export class GameScene extends Phaser.Scene {
         })
 
         for (let x=0; x < POPCOUNT; x++) {
-            let newPop: Population = {phenotypeMap: new Map(), livingIndividuals: []};
+            let newPop: Population = {phenotypeMap: new Map(), livingIndividuals: [], id: x, updateNeeded: false};
+            
             let newX = Phaser.Math.Between(0, window.innerWidth);
             let newY = Phaser.Math.Between(0, window.innerHeight);
-            let org = new Organism(this, new Phaser.GameObjects.Rectangle(this, newX, newY, 80, 80),
-                new Phaser.Geom.Rectangle(0, 0, window.innerWidth, window.innerHeight));
+            let org = RandomOrganism(this, newX, newY, x);
+
             newPop.livingIndividuals[0] = org;
             newPop.livingIndividuals[0].Draw();
             this.allLiving.push(newPop.livingIndividuals[0]);
-            this.populations[x] = newPop;
+
+            for (let y=1; y < POPSIZE; y++) {
+                let newX = Phaser.Math.Between(0, window.innerWidth);
+                let newY = Phaser.Math.Between(0, window.innerHeight);
+                let newOrg = CloneOrganism(this, newX, newY, org);
+                newPop.livingIndividuals[y] = newOrg;
+                newPop.livingIndividuals[y].Draw();
+                this.allLiving.push(newPop.livingIndividuals[y]);
+            }
+
             //console.log(this.population[x].toString())
+            populationMap.set(x, newPop);
         }
 
         this.waterBodies.setDepth(0);
@@ -108,7 +123,9 @@ export class GameScene extends Phaser.Scene {
     // Set up depth of organisms on screen based on collision/overlap detection.
     setOrgDepth() {
         this.allLiving.forEach((org: Organism) => {
-
+            if (org === undefined || org.drawnParts === undefined || org.status != 1) {
+                return;   
+            }
             // Set default organism and detector depth.
             org.drawnParts.setDepth(2);
             org.detector.sectorGraphic.setDepth(2)
@@ -121,7 +138,8 @@ export class GameScene extends Phaser.Scene {
             const treeColliders = this.trees.getChildren();
 
             // Iterate over each berry object, checking for intersection.
-            berryColliders.forEach((berry: Phaser.GameObjects.Image) => {
+            berryColliders.forEach((berry: Plant) => {
+                berry.Update();
                 // Get bounding rectangles
                 const orgBounds = org.rect.getBounds();
                 const berryBounds = berry.getBounds();
@@ -181,107 +199,33 @@ export class GameScene extends Phaser.Scene {
     }
 
     update() {
-        this.setOrgDepth();
-        this.allLiving.forEach((org: Organism) => {     
-            org.Act();
-            org.Update();
-            org.Draw();
-        })   
-    }
-}
-
-/*export class GameScene extends Phaser.Scene {
-    
-    private mapArray: [][];
-    
-    // Tile map stuff
-    private map: Phaser.Tilemaps.Tilemap;
-    private tileset: Phaser.Tilemaps.Tileset;
-    private backgroundLayer: Phaser.Tilemaps.TilemapLayer;
-
-    // Interaction things
-    private trees: Phaser.GameObjects.Group;
-    private berries: Phaser.GameObjects.Group;
-    private waterBodies: Phaser.GameObjects.Group;
-
-    constructor() {
-        super({
-            key: 'GameScene'
-        })
-    }
-
-    createTree(x: number, y: number): void {
-        const tree = this.add.image(x*80, y*80, 'treeBg');
-        this.trees.add(tree);
-    }
-
-    createBerry(x: number, y: number): void {
-        const berry = this.add.image(x*80, y*80, 'berrySource');
-        this.berries.add(berry);
-    }
-
-    createWaterBody(x: number, y: number): void {
-        const water = this.add.image(x*80, y*80, 'waterBg');
-        this.waterBodies.add(water);
-    }
-
-    preload(): void {
-        this.load.pack('preload', './assets/pack.json', 'preload');
-    }
-
-    init(): void {}
-
-    create(): void {
-        // Generate tile map
-        this.map = this.make.tilemap({data: this.mapArray, tileWidth: 80, tileHeight: 80, width: 10, height: 10});
-        console.log(this.map)
-        this.tileset = this.map.addTilesetImage('grassBg', 'map');
-
-        this.backgroundLayer = this.map.createLayer(
-            (50),
-            this.tileset,
-            0,
-            0,
-        );
-        
-        // Set up interaction things
-        this.trees = this.add.group();
-        this.berries = this.add.group();
-        this.waterBodies = this.add.group();
-
-        this.add.image(0, 0, 'grassBg')
-
-
-
-/*         // Random generation of tiles and stuff
-        this.map.layers.forEach((layer: Phaser.Tilemaps.LayerData) => {
-            layer.data.forEach((row: Phaser.Tilemaps.Tile[]) => {
-                row.forEach((tile: Phaser.Tilemaps.Tile) => {
-                    if (tile.index !== -1) {
-                        switch (tile.properties.habitat) {
-                        case 'grassland':
-                            if (Phaser.Math.Between(1, 10) === 1) {
-                                this.createTree(tile.x, tile.y);
-                            } else if (Phaser.Math.Between(1, 5) === 1) {
-                                this.createBerry(tile.x, tile.y);
-                            }
-                            break;
-                        case 'forest': 
-                            this.createTree(tile.x, tile.y);
-                            if (Phaser.Math.Between(1, 3) === 1) {
-                                this.createBerry(tile.x, tile.y);
-                            }
-                            break;
-                        case 'aquatic': 
-                            this.createWaterBody(tile.x, tile.y);
-                            break;
-                        default:
-                            break;
-                        }
+        // Check for updates to living individuals
+        populationMap.forEach((pop: Population) => {
+            if (pop.updateNeeded == true) {
+                // Iterate through all living individuals in each existing population
+                pop.livingIndividuals.forEach((org: Organism) => {
+                    // If an organism died, remove it from the scene.
+                    if (org.status == -1) {
+                        let popIndex = pop.livingIndividuals.indexOf(org);
+                        pop.livingIndividuals.splice(popIndex, 1);
+                        let liveIndex = this.allLiving.indexOf(org);
+                        this.allLiving.splice(liveIndex, 1);
+                    }
+                    // If an organism was born, add it to the scene.
+                    if (org.status == 0) {
+                        console.log("NEW ORGANISM")
+                        org.status = 1
+                        this.allLiving.push(org);
                     }
                 })
-            })
+                pop.updateNeeded = false;
+            }
+        })
+        this.setOrgDepth();
+        this.allLiving.forEach((org: Organism) => {   
+            org.Draw();  
+            org.Act();
+            org.Update();
         })
     }
 }
-*/

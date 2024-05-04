@@ -1,5 +1,6 @@
 import { DrawSector, Line, Sector } from "../helpers/geometry";
 import { Organism } from "../objects/organism";
+import { Plant } from "./food";
 
 export class Detector {
     sector: Sector;
@@ -19,7 +20,7 @@ export class Detector {
     // object overlaps and returns the object(s) if so, else returns null.
     // Also change orientation of the organism based on the feedback
     // of the detected object: neutral / move toward / move away
-    CollisionDetected(otherObject: Phaser.GameObjects.Image | Organism, otherBounds: Phaser.Geom.Rectangle): Phaser.GameObjects.Image | Organism | null {
+    CollisionDetected(otherObject: Phaser.GameObjects.Image | Plant | Organism, otherBounds: Phaser.Geom.Rectangle): Phaser.GameObjects.Image | Plant | Organism | null {
         const arcBounds = new Phaser.Geom.Circle(this.sector.center.x, this.sector.center.y, this.sector.radius)
         if (Phaser.Geom.Intersects.CircleToRectangle(arcBounds, otherBounds)) {
             //console.log(true)

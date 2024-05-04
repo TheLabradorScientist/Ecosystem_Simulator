@@ -7,7 +7,9 @@ export type position = { x: number; y: number}
 export type Target = { 
     object: Phaser.GameObjects.GameObject, 
     objectBounds: Phaser.Geom.Rectangle,
-    relationship: number }
+    relationship: number,
+    type: string | null
+}
 
 // Sector type
 export interface Sector {

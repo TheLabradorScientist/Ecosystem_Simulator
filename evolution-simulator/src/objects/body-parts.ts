@@ -46,6 +46,22 @@ export function NewLimbs(rect: Phaser.GameObjects.Rectangle): Limbs {
 	}
 };
 
+export function CloneLimbs(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, original: Limbs): Limbs {
+    let newForelimbShape = new Trait({ scene: scene, texture: original.forelimbShape.name, rect: rect });
+	let newHindlimbShape = new Trait({ scene: scene, texture: original.hindlimbShape.name, rect: rect });
+
+    let newExtremity = new Trait({ scene: scene, texture: original.extremity.name, rect: rect });
+
+	let traitsArray = [newForelimbShape, newHindlimbShape, newExtremity];
+
+	return {
+		forelimbShape: newForelimbShape,
+		hindlimbShape: newHindlimbShape,
+		extremity:     newExtremity,
+		traits:        traitsArray,
+	}
+};
+
 export function limbsToString(l: Limbs): string {
 	return ["Forelimb: ", l.forelimbShape.name, " \n+ ",
 		"Hindlimb: ", l.hindlimbShape.name, " \n+ ",
@@ -68,6 +84,23 @@ export function NewHead(rect: Phaser.GameObjects.Rectangle): Head {
 	let newNose = new Trait({ scene: rect.scene, texture: Randomize(nose), rect: rect });
 	let newEars = new Trait({ scene: rect.scene, texture: Randomize(ears), rect: rect });
 	let traitsArray = [newTeeth, newEyes, newNose, newEars];
+	return {
+		teeth:  newTeeth,
+		eyes:   newEyes,
+		nose:   newNose,
+		ears:   newEars,
+		traits: traitsArray,
+	}
+};
+
+export function CloneHead(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, original: Head): Head {
+    let newTeeth = new Trait({ scene: scene, texture: original.teeth.name, rect: rect });
+	let newEyes = new Trait({ scene: scene, texture: original.eyes.name, rect: rect });
+	let newNose = new Trait({ scene: scene, texture: original.nose.name, rect: rect });
+	let newEars = new Trait({ scene: scene, texture: original.ears.name, rect: rect });
+
+	let traitsArray = [newTeeth, newEyes, newNose, newEars];
+	
 	return {
 		teeth:  newTeeth,
 		eyes:   newEyes,
@@ -109,6 +142,23 @@ export function NewTorso(rect: Phaser.GameObjects.Rectangle): Torso {
 	};
 };
 
+export function CloneTorso(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, original: Torso): Torso {
+    let newBuild = new Trait({ scene: scene, texture: original.build.name, rect: rect });
+	let newPatterns = new Trait({ scene: scene, texture: original.patterns.name, rect: rect });
+	let newSkin = new Trait({ scene: scene, texture: original.skin.name, rect: rect });
+	let newGut = new Trait({ scene: scene, texture: original.gut.name, rect: rect });
+
+	let traitsArray = [newBuild, newPatterns, newSkin, newGut];
+	
+	return {
+		build:    newBuild,
+		patterns: newPatterns,
+		skin:     newSkin,
+		gut:      newGut,
+		traits:   traitsArray,
+	}
+};
+
 export function torsoToString(t: Torso): string {
 	return ["Build: ", t.build.name, " \n+ ",
 		"Patterns: ", t.patterns.name, " \n+ ",
@@ -122,6 +172,13 @@ export interface Tail extends Part {
 
 export function NewTail(rect: Phaser.GameObjects.Rectangle): Tail {
 	let newTail = new Trait({ scene: rect.scene, texture: Randomize(tail), rect: rect });
+	return {
+		tail: newTail,
+	}
+};
+
+export function CloneTail(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, original: Tail): Tail {
+    let newTail = new Trait({ scene: scene, texture: original.tail.name, rect: rect });
 	return {
 		tail: newTail,
 	}
