@@ -1,35 +1,64 @@
+export const hsv = Phaser.Display.Color.HSVColorWheel();
 
+export interface Tint {
 
-export function modifyColor(scene: Phaser.Scene, key: string) {
-    this.originalTexture = this.textures.get('dude').getSourceImage();
-
-    this.newTexture = this.textures.createCanvas('dudeNew', this.originalTexture.width, this.originalTexture.height);
-
-    this.context = this.newTexture.getSourceImage().getContext('2d');
-
-    this.context.drawImage(this.originalTexture, 0, 0);
-
-    this.add.image(100, 100, 'dude');
-    this.add.image(200, 100, 'dudeNew');
-
-    this.time.addEvent({ delay: 500, callback: () => this.hueShift(), loop: true });
 }
 
-export function hueShift ()
-{
-    const pixels = this.context.getImageData(0, 0, this.originalTexture.width, this.originalTexture.height);
-
-    for (let i = 0; i < pixels.data.length / 4; i++)
-    {
-        this.processPixel(pixels.data, i * 4, 0.1);
+export function CreateTint(originalTint: number): number {
+    let str = originalTint.toString(16);
+    console.log(str)
+    let newTintStr = ''
+    // originalTint = 0 x f f f f f f
+    for (let x = 0; x < str.length-4; x++) {
+        const dig = parseInt(str[x], 16);
+        let rand = Phaser.Math.Between(12, dig);
+        newTintStr += rand.toString();
+    }
+    for (let x = str.length-4; x < str.length-2; x++) {
+        const dig = parseInt(str[x], 16);
+        let rand = Phaser.Math.Between(4, 10);
+        newTintStr += rand.toString();
+    }
+    for (let x = str.length-2; x < str.length; x++) {
+        const dig = parseInt(str[x], 16);
+        let rand = Phaser.Math.Between(0, 2);
+        newTintStr += rand.toString();
     }
 
-    this.context.putImageData(pixels, 0, 0);
+    let newTint = parseInt(newTintStr);
+    console.log(newTint)
+    return newTint;
+}
 
-    this.newTexture.refresh();
+/* 
+export function modifyColor(scene: Phaser.Scene, key: string) {
+    let originalTexture = (scene.textures.get(key).getSourceImage() as HTMLImageElement);
+
+    let newTexture = scene.textures.createCanvas('new', originalTexture.width, originalTexture.height);
+
+    let context = (newTexture.getSourceImage() as HTMLCanvasElement).getContext('2d');
+
+    context.drawImage(originalTexture, 0, 0);
+
+    scene.add.image(100, 100, key);
+    scene.add.image(200, 100, 'new');
+
+    scene.time.addEvent({ delay: 500, callback: () => hueShift(context, originalTexture, newTexture), loop: true });
+}
+
+export function hueShift (context: CanvasRenderingContext2D, originalTexture: HTMLImageElement, newTexture: Phaser.Textures.CanvasTexture) {
+    const pixels = context.getImageData(0, 0, originalTexture.width, originalTexture.height);
+
+    for (let i = 0; i < pixels.data.length / 4; i++) {
+        processPixel(pixels.data, i * 4, 0.1);
+    }
+
+    context.putImageData(pixels, 0, 0);
+
+    newTexture.refresh();
 }    
-export function processPixel (data: any[], index: number, deltahue: number)
-{
+
+export function processPixel (data: Uint8ClampedArray, index: number, deltahue: number) {
     const r = data[index];
     const g = data[index + 1];
     const b = data[index + 2];
@@ -44,4 +73,4 @@ export function processPixel (data: any[], index: number, deltahue: number)
     data[index + 1] = rgb.g;
     data[index + 2] = rgb.b;
 
-}
+} */

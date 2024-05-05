@@ -1,4 +1,4 @@
-import { Trait } from "./trait";
+import { Trait, eyes } from "./trait";
 import { DrawSector, GetRelativePosition, RandomOrientation, Target, oppositeOrientation, orientationMap } from "../helpers/geometry";
 import { detectionTraits, dietTraits, mobilityTraits, speedTraits, strengthTraits, visibilityTraits } from "../helpers/trait-maps";
 import { Characteristics } from "../interfaces/characteristics";
@@ -315,6 +315,9 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
 
                 trait.rotation = this.rect.rotation;
                 trait.scale = trait.rect.scale;
+                if (!eyes.includes(trait.name)) {
+                    trait.setTint(this.color);
+                }
                 
                 this.drawnParts.add(this.scene.add.existing(trait));
             }

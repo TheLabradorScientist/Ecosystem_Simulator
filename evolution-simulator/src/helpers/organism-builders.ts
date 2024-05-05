@@ -1,12 +1,13 @@
 import { NewHead, NewTorso, NewLimbs, NewTail, CloneHead, CloneTorso, CloneLimbs, CloneTail } from "../objects/body-parts";
 import { Organism } from "../objects/organism";
+import { CreateTint } from "./utility";
 
 // 3 * Organism creation: 1) Creating an ancestor randomly
 export function RandomOrganism(scene: Phaser.Scene, x: number, y: number, id: number): Organism {
     let org_rect = new Phaser.GameObjects.Rectangle(scene, x, y, 80, 80);
     let scene_rect = new Phaser.Geom.Rectangle(0, 0, window.innerWidth, window.innerHeight); 
     
-    let newColor = 0xffffff;    // TODO: Should be used to scale the organism's base color
+    let newColor = CreateTint(0xffffff);    // TODO: Should be used to scale the organism's base color
 
     let newSize = Phaser.Math.Between(-5, 5); // Might be edited later to implement age
                                                 // Max size at a certain age, until which
