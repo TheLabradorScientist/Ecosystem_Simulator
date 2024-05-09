@@ -13,6 +13,11 @@
 		},
 		{
 			"type": "image",
+			"key": "titleArt",
+			"url": "./assets/images/title_art.png"
+		},
+		{
+			"type": "image",
 			"key": "waterBg",
 			"url": "./assets/images/waterBg.png"
 		},

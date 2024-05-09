@@ -124,7 +124,11 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
     }
 
     Update() {
-        this.hunger+=0.05;
+        if (this.characteristics.diet > 7) {
+            this.hunger+=0.02;
+        } else {
+            this.hunger+= 0.05
+        }
         this.age+=0.01;
         if (this.hunger > this.characteristics.metabolism) {
             this.Die();
@@ -133,8 +137,12 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
         if (this.age > 150) {
             this.Die();
         }
-        if (this.canMate == false && this.age > 20 && Math.round(this.age % 20) == 0) {
-            this.canMate = true;
+        if (this.canMate == false && this.age > 20) {
+            if (this.characteristics.diet < 8 && Math.round(this.age % 20) == 0) {
+                this.canMate = true;
+            } else if (Math.round(this.age % 40) == 0) {
+                this.canMate = true;
+            }
         }
     }
 
@@ -281,6 +289,9 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
                 this.hunger -= this.target.object.currNutrition;
                 this.target.object.currNutrition = 0;
             }
+            if (this.target.object instanceof Organism) {
+                this.target.object.Die();
+            }
         }
         this.energy = this.characteristics.metabolism-this.hunger;
         console.log("Target dropped: Food")
@@ -371,9 +382,16 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
     }
 
     checkIfFood(obj: Phaser.GameObjects.Image | Plant | Organism): boolean {
-        if (obj instanceof Plant) {
+        if (obj instanceof Plant && this.characteristics.diet < 7) {
             this.detector.detectedObjects.shift()
             return true;   
+        }
+        if (obj instanceof Organism && this.characteristics.diet > 7) {
+            if (obj.characteristics.strength < this.characteristics.strength) {
+                console.log("Prey!")
+                this.detector.detectedObjects.shift()
+                return true;
+            }
         }
         return false;
 
@@ -393,7 +411,7 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
     }
 
     checkIfPredator(obj: Organism): boolean {
-        if (obj.size > 2+this.size) {
+        if (obj.characteristics.diet > 7 && obj.characteristics.strength > this.characteristics.strength) {
             this.detector.detectedObjects.shift()
             return true;
         } else {
@@ -434,13 +452,13 @@ export class Organism extends Phaser.GameObjects.GameObject implements Food {
 
     dietString(diet: number): string {
         if (diet < -7) {
-            return "Obligate carnivore";
-        } else if (diet < -3) {
-            return "Facultative carnivore";
-        } else if (diet > 7) {
             return "Obligate herbivore";
-        } else if (diet > 3) {
+        } else if (diet < -3) {
             return "Facultative herbivore";
+        } else if (diet > 7) {
+            return "Obligate carnivore";
+        } else if (diet > 3) {
+            return "Facultative carnivore";
         } else {
             return "True omnivore";
         }

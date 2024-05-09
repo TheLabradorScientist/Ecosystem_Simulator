@@ -4,8 +4,8 @@ import { Population } from "../interfaces/population";
 import { Organism } from "../objects/organism";
 
 // Organism count: determined by main screen input
-export var POPCOUNT: number = 3;
-export var POPSIZE: number = 2;
+export var POPCOUNT: number = 4;
+export var POPSIZE: number = 3;
 export var populationMap = new Map<number, Population>();
 
 export class GameScene extends Phaser.Scene {
@@ -91,8 +91,8 @@ export class GameScene extends Phaser.Scene {
         for (let x=0; x < POPCOUNT; x++) {
             let newPop: Population = {phenotypeMap: new Map(), livingIndividuals: [], id: x, updateNeeded: false};
             
-            let newX = Phaser.Math.Between(0, window.innerWidth);
-            let newY = Phaser.Math.Between(0, window.innerHeight);
+            let newX = Phaser.Math.Between(0, window.innerWidth-150);
+            let newY = Phaser.Math.Between(0, window.innerHeight+75);
             let org = RandomOrganism(this, newX, newY, x);
 
             newPop.livingIndividuals[0] = org;
@@ -100,8 +100,8 @@ export class GameScene extends Phaser.Scene {
             this.allLiving.push(newPop.livingIndividuals[0]);
 
             for (let y=1; y < POPSIZE; y++) {
-                let newX = Phaser.Math.Between(0, window.innerWidth);
-                let newY = Phaser.Math.Between(0, window.innerHeight);
+                let newX = Phaser.Math.Between(0, window.innerWidth-150);
+                let newY = Phaser.Math.Between(0, window.innerHeight+75);
                 let newOrg = CloneOrganism(this, newX, newY, org);
                 newPop.livingIndividuals[y] = newOrg;
                 newPop.livingIndividuals[y].Draw();
@@ -223,6 +223,9 @@ export class GameScene extends Phaser.Scene {
         })
         this.setOrgDepth();
         this.allLiving.forEach((org: Organism) => {   
+            if (org === undefined || org.drawnParts === undefined || org.status != 1) {
+                return;   
+            }
             org.Draw();  
             org.Act();
             org.Update();

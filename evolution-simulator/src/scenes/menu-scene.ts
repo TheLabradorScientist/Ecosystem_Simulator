@@ -20,11 +20,12 @@ export class MenuScene extends Phaser.Scene {
     }
 
     init(): void {
+        this.add.image(0, 0, 'titleArt').setDisplaySize(window.innerWidth-150, window.innerHeight+75).setOrigin(0, 0);
         this.title = this.add.text(100, 100, 'Evolution \nSimulator ', 
             { fontFamily: 'Lugrasimo', fontSize: 80, color: '#80ff40' 
             }).setShadow(6, 8, '#005555', 7, false, true);
 
-        this.startButton = new Button({scene: this, texture: 'genButton', rect: new Phaser.GameObjects.Rectangle(this, 350, 500)}, startScene)
+        this.startButton = new Button({scene: this, texture: 'genButton', rect: new Phaser.GameObjects.Rectangle(this, 800, 600)}, startScene)
         
         this.popSlider = new Slider({scene: this, texture: 'popSlider', rect: new Phaser.GameObjects.Rectangle(this, 750, 400, 500, 50, 0xffffff, 0.5)})
     }
