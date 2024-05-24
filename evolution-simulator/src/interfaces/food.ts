@@ -1,30 +1,40 @@
 import { SpriteConstructor } from "./sprite-interface";
 
-export interface Food {
+export class Food extends Phaser.GameObjects.Image {
     nutritionCap: number; // Maximum # by which it decreases hunger
             // Food source is considered depleted with nutrition = 0
     currNutrition: number; // # that has been consumed.
+
+    // Partial full image
+    // When currNutrition > 0.4 * nutritionCap
+    full_texture: string;
+    // When currNutrition < 0.4 * nutritionCap
+    empty_texture: string;
+
+    constructor(aParams: SpriteConstructor, nutritionCap: number) {
+        super(aParams.scene, aParams.rect.x, aParams.rect.y, aParams.texture);
+        this.full_texture = aParams.texture;
+        this.empty_texture = aParams.texture2
+
+        this.nutritionCap = nutritionCap;
+        this.currNutrition = this.nutritionCap;
+
+        this.scene.add.existing(this);
+    }
 }
 
-export class Plant extends Phaser.GameObjects.Image implements Food {
+export class Plant extends Food {
     
     nutritionCap: number;
     currNutrition: number;
-    // ?? Maybe a partial full image?
+    // Partial full image
     // When currNutrition > 0.4 * nutritionCap
     full_texture: string;
     // When currNutrition < 0.4 * nutritionCap
     empty_texture: string;
 
     constructor(aParams: SpriteConstructor) {
-        super(aParams.scene, aParams.rect.x, aParams.rect.y, aParams.texture);
-        this.full_texture = aParams.texture;
-        this.empty_texture = aParams.texture2;
-
-        this.nutritionCap = 60;
-        this.currNutrition = this.nutritionCap;
-
-        this.scene.add.existing(this);
+        super(aParams, 60);
     }
 
     Update() {
@@ -41,5 +51,26 @@ export class Plant extends Phaser.GameObjects.Image implements Food {
             }
         }
     }
+}
 
+export class Meat extends Food {
+    nutritionCap: number;
+    currNutrition: number;
+    // Partial full image
+    // When currNutrition > 0.4 * nutritionCap
+    full_texture: string;
+    // When currNutrition < 0.4 * nutritionCap
+    empty_texture: string;
+
+    constructor(aParams: SpriteConstructor, nutritionCap: number) {
+        super(aParams, nutritionCap);
+        this.setTexture(this.full_texture); 
+    }
+
+    Update() {
+        if (this.currNutrition < 0.5*this.nutritionCap && this.texture.key != this.empty_texture) {
+            this.setTexture(this.empty_texture); 
+        }
+        this.currNutrition -= 0.0005
+    }
 }

@@ -20,7 +20,7 @@ export class MenuScene extends Phaser.Scene {
     }
 
     init(): void {
-        this.add.image(0, 0, 'titleArt').setDisplaySize(window.innerWidth-150, window.innerHeight+75).setOrigin(0, 0);
+        this.add.image(0, 0, 'titleArt').setDisplaySize(window.innerWidth-50, window.innerHeight+75).setOrigin(0, 0);
         this.title = this.add.text(100, 100, 'Evolution \nSimulator ', 
             { fontFamily: 'Lugrasimo', fontSize: 80, color: '#80ff40' 
             }).setShadow(6, 8, '#005555', 7, false, true);

@@ -38,6 +38,16 @@
 		},		
 		{
 			"type": "image",
+			"key": "meatSource",
+			"url": "./assets/images/meatSource.png"
+		},
+		{
+			"type": "image",
+			"key": "depleted_meatSource",
+			"url": "./assets/images/depleted_meatSource.png"
+		},		
+		{
+			"type": "image",
 			"key": "genButton",
 			"url": "./assets/images/gen_Button.png"
 		},

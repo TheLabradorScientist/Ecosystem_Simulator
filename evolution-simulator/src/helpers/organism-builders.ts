@@ -5,7 +5,7 @@ import { CreateTint } from "./utility";
 // 3 * Organism creation: 1) Creating an ancestor randomly
 export function RandomOrganism(scene: Phaser.Scene, x: number, y: number, id: number): Organism {
     let org_rect = new Phaser.GameObjects.Rectangle(scene, x, y, 80, 80);
-    let scene_rect = new Phaser.Geom.Rectangle(0, 0, window.innerWidth-150, window.innerHeight+75); 
+    let scene_rect = new Phaser.Geom.Rectangle(0, 0, window.innerWidth-50, window.innerHeight+75); 
     
     let newColor = CreateTint(0xffffff);    // TODO: Should be used to scale the organism's base color
 

@@ -22,7 +22,6 @@
 // aka, closer to -10 = more herbivorous, closer to +10 = more carnivorous, -2:+2 = omnivorous
 
 // Diet starts at 0, is determined by variety of factors -
-//
 //	Teeth, Extremity, Gut, Pupil.
 export const dietTraits = new Map<string, number>([
 	["sharp canines", +3],

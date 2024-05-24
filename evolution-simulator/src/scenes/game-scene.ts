@@ -1,5 +1,5 @@
 import { RandomOrganism, CloneOrganism } from "../helpers/organism-builders";
-import { Plant } from "../interfaces/food";
+import { Meat, Plant } from "../interfaces/food";
 import { Population } from "../interfaces/population";
 import { Organism } from "../objects/organism";
 
@@ -17,6 +17,7 @@ export class GameScene extends Phaser.Scene {
     // Interaction things
     private trees: Phaser.GameObjects.Group;
     private berries: Phaser.GameObjects.Group;
+    private carrion: Phaser.GameObjects.Group;
     private waterBodies: Phaser.GameObjects.Group;
     private allLiving: Organism[];
 
@@ -44,6 +45,16 @@ export class GameScene extends Phaser.Scene {
         this.berries.add(berry);
     }
 
+    createCarrion(x: number, y: number, nutritionCap: number): Meat {
+        let meat: Meat = new Meat({
+            scene: this, texture: 'meatSource', 
+            texture2: 'depleted_meatSource',
+            rect: new Phaser.GameObjects.Rectangle(this, x, y+25)
+        }, nutritionCap)
+        this.carrion.add(meat);
+        return meat;
+    }
+
     createWaterBody(x: number, y: number): void {
         const water = this.add.image(x*80, (y*80)+10, 'waterBg');
         this.waterBodies.add(water);
@@ -64,6 +75,7 @@ export class GameScene extends Phaser.Scene {
         // Set up interaction things
         this.trees = this.add.group();
         this.berries = this.add.group();
+        this.carrion = this.add.group();
         this.waterBodies = this.add.group();
 
         //this.add.image(0, 0, 'grassBg')
@@ -75,10 +87,10 @@ export class GameScene extends Phaser.Scene {
                     if (tile.index !== -1) {
                         if (Phaser.Math.Between(1, 5) === 1) {
                             this.createTree(tile.x, tile.y);
-                            if (Phaser.Math.Between(1, 12) === 1) {
+                            if (Phaser.Math.Between(1, 10) === 1) {
                                 this.createBerry(tile.x, tile.y);
                             }
-                        } else if (Phaser.Math.Between(1, 7) === 1) {
+                        } else if (Phaser.Math.Between(1, 5) === 1) {
                             this.createBerry(tile.x, tile.y);
                         } else if (Phaser.Math.Between(1, 3) == 1) {
                             this.createWaterBody(tile.x, tile.y);
@@ -91,7 +103,7 @@ export class GameScene extends Phaser.Scene {
         for (let x=0; x < POPCOUNT; x++) {
             let newPop: Population = {phenotypeMap: new Map(), livingIndividuals: [], id: x, updateNeeded: false};
             
-            let newX = Phaser.Math.Between(0, window.innerWidth-150);
+            let newX = Phaser.Math.Between(0, window.innerWidth-50);
             let newY = Phaser.Math.Between(0, window.innerHeight+75);
             let org = RandomOrganism(this, newX, newY, x);
 
@@ -100,7 +112,7 @@ export class GameScene extends Phaser.Scene {
             this.allLiving.push(newPop.livingIndividuals[0]);
 
             for (let y=1; y < POPSIZE; y++) {
-                let newX = Phaser.Math.Between(0, window.innerWidth-150);
+                let newX = Phaser.Math.Between(0, window.innerWidth-50);
                 let newY = Phaser.Math.Between(0, window.innerHeight+75);
                 let newOrg = CloneOrganism(this, newX, newY, org);
                 newPop.livingIndividuals[y] = newOrg;
@@ -115,6 +127,7 @@ export class GameScene extends Phaser.Scene {
         this.waterBodies.setDepth(0);
         this.trees.setDepth(2);
         this.berries.setDepth(2);
+        this.carrion.setDepth(2);
 
         this.setOrgDepth();
 
@@ -135,6 +148,7 @@ export class GameScene extends Phaser.Scene {
 
             // Set up colliders for each berry/tree on the map.
             const berryColliders = this.berries.getChildren();
+            const meatColliders = this.carrion.getChildren();
             const treeColliders = this.trees.getChildren();
 
             // Iterate over each berry object, checking for intersection.
@@ -160,6 +174,31 @@ export class GameScene extends Phaser.Scene {
             // Set up organism sensing berries.
             //this.physics.add.group(berryColliders);
             //org.Sense(org.detector.CollisionDetected(berryColliders));
+
+            // Iterate over each carrion object, checking for intersection.
+            meatColliders.forEach((meat: Meat) => {
+                meat.Update();
+                if (meat.currNutrition == 0) {
+                    this.carrion.remove(meat, true, true)
+                    return;
+                }
+
+                // Get bounding rectangles
+                const orgBounds = org.rect.getBounds();
+                const meatBounds = meat.getBounds();
+                // Check intersection of bounding rectangles, return if any collision detected.
+                if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, meatBounds)) {
+                    collisionDetected = true;
+                    collidedWith = meat;
+                    return;
+                }
+                
+                // Set up organism sensing carrion.
+                let obj = org.detector.CollisionDetected(meat, meatBounds);
+                if (obj != null) {
+                    org.Sense(obj);
+                }
+            })
 
             // Set up organism sensing other organisms.
             //var orgColliders: Phaser.GameObjects.GameObject[] = [];
