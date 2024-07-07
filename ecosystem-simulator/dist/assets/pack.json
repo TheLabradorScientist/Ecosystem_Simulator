@@ -1,0 +1,206 @@
+{
+	"preload": {
+	  "files": [
+		{
+			"type": "tilemapTiledJSON",
+			"key": "evoBg",
+			"url": "./assets/maps/evoBg.json"
+		},
+		{
+			"type": "image",
+			"key": "grassBg",
+			"url": "./assets/images/grassBg.png"
+		},
+		{
+			"type": "image",
+			"key": "titleArt",
+			"url": "./assets/images/title_art.png"
+		},
+		{
+			"type": "image",
+			"key": "waterBg",
+			"url": "./assets/images/waterBg.png"
+		},
+		{
+			"type": "image",
+			"key": "treeBg",
+			"url": "./assets/images/treeBg.png"
+		},
+		{
+			"type": "image",
+			"key": "berrySource",
+			"url": "./assets/images/berrySource.png"
+		},
+		{
+			"type": "image",
+			"key": "depleted_berrySource",
+			"url": "./assets/images/depleted_berrySource.png"
+		},		
+		{
+			"type": "image",
+			"key": "meatSource",
+			"url": "./assets/images/meatSource.png"
+		},
+		{
+			"type": "image",
+			"key": "depleted_meatSource",
+			"url": "./assets/images/depleted_meatSource.png"
+		},		
+		{
+			"type": "image",
+			"key": "genButton",
+			"url": "./assets/images/gen_Button.png"
+		},
+		{
+			"type": "image",
+			"key": "front, slit pupils",
+			"url": "./assets/images/eyes_slit.png"			
+		},
+		{
+			"type": "image",
+			"key": "sides, horizontal pupils",
+			"url": "./assets/images/eyes_horizontal.png"			
+		},
+		{
+			"type": "image",
+			"key": "small, round pupils",
+			"url": "./assets/images/eyes_smallR.png"			
+		},
+		{
+			"type": "image",
+			"key": "large, round pupils",
+			"url": "./assets/images/eyes_largeR.png"			
+		},
+		{
+			"type": "image",
+			"key": "nostrils",
+			"url": "./assets/images/face_nostrils.png"			
+		},
+		{
+			"type": "image",
+			"key": "short muzzle",
+			"url": "./assets/images/face_muzzle.png"			
+		},	{
+			"type": "image",
+			"key": "long snout",
+			"url": "./assets/images/face_snout.png"			
+		},
+		{
+			"type": "image",
+			"key": "beak",
+			"url": "./assets/images/face_beak.png"			
+		},
+		{
+			"type": "image",
+			"key": "forward, triangular ears",
+			"url": "./assets/images/ears_triangle.png"			
+		},
+		{
+			"type": "image",
+			"key": "large, movable ears",
+			"url": "./assets/images/ears_large.png"			
+		},
+		{
+			"type": "image",
+			"key": "small, streamlined ears",
+			"url": "./assets/images/ears_small.png"			
+		},		
+		{
+			"type": "image", 
+			"key": "lithe",
+			"url": "./assets/images/build_lithe.png"			
+		},
+		{
+			"type": "image", 
+			"key": "bulky",
+			"url": "./assets/images/build_bulky.png"			
+		},
+		{
+			"type": "image", 
+			"key": "average",
+			"url": "./assets/images/build_average.png"			
+		},
+		{
+			"type": "image", 
+			"key": "stripes",
+			"url": "./assets/images/pattern_stripes.png"			
+		},
+		{
+			"type": "image", 
+			"key": "spots",
+			"url": "./assets/images/pattern_spots.png"			
+		},
+		{
+			"type": "image", 
+			"key": "arms/legs",
+			"url": "./assets/images/foreleg.png"			
+		},
+		{
+			"type": "image", 
+			"key": "wings",
+			"url": "./assets/images/forewing.png"			
+		},
+		{
+			"type": "image", 
+			"key": "fins",
+			"url": "./assets/images/forefin.png"			
+		},
+		{
+			"type": "image",
+			"key": "claws",
+			"url": "./assets/images/extr_claws.png"			
+		},
+		{
+			"type": "image", 
+			"key": "paws",
+			"url": "./assets/images/extr_paws.png"			
+		},
+		{
+			"type": "image", 
+			"key": "hands",
+			"url": "./assets/images/extr_hands.png"			
+		},
+		{
+			"type": "image", 
+			"key": "hooves",
+			"url": "./assets/images/extr_hooves.png"			
+		},
+		{
+			"type": "image", 
+			"key": "legs",
+			"url": "./assets/images/hindleg.png"			
+		},
+		{
+			"type": "image", 
+			"key": "talons",
+			"url": "./assets/images/hindtalon.png"			
+		},
+		{
+			"type": "image", 
+			"key": "hindfins",
+			"url": "./assets/images/hindfin.png"			
+		},
+		{
+			"type": "image", 
+			"key": "stub",
+			"url": "./assets/images/tail_stub.png"			
+		},
+		{
+			"type": "image", 
+			"key": "tailfeathers",
+			"url": "./assets/images/tail_feathers.png"			
+		},
+		{
+			"type": "image", 
+			"key": "tailfin",
+			"url": "./assets/images/tail_fin.png"			
+		},
+		{
+			"type": "image", 
+			"key": "prehensile",
+			"url": "./assets/images/tail_prehensile.png"			
+		}
+	  ]
+	}
+  }
+  
