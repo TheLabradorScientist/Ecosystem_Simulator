@@ -3,8 +3,8 @@
 	  "files": [
 		{
 			"type": "tilemapTiledJSON",
-			"key": "evoBg",
-			"url": "./assets/maps/evoBg.json"
+			"key": "ecoBg",
+			"url": "./assets/maps/ecoBg.json"
 		},
 		{
 			"type": "image",

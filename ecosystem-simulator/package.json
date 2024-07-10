@@ -1,7 +1,7 @@
 {
-  "name": "evolution-simulator",
+  "name": "ecosystem-simulator",
   "version": "0.0.1",
-  "description": "Evolution Simulator for Phaser 3 in TypeScript",
+  "description": "Ecosystem Simulator using Phaser 3 in TypeScript",
   "keywords": [],
   "scripts": {
     "build-dev": "webpack --mode development",
@@ -9,6 +9,7 @@
     "serve-dev": "webpack --mode development && webpack serve --mode development"
   },
   "devDependencies": {
+    "@types/dat.gui": "^0.7.13",
     "@types/node": "20.11.25",
     "@types/webfontloader": "^1.6.38",
     "@types/webpack": "5.28.5",
@@ -23,6 +24,7 @@
     "webpack-dev-server": "5.0.2"
   },
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "phaser": "3.80.1",
     "webfontloader": "^1.6.28"
   },

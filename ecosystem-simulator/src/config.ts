@@ -3,7 +3,7 @@ import { GameScene } from './scenes/game-scene';
 import { MenuScene } from './scenes/menu-scene';
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
-  title: 'Evolution Simulator',
+  title: 'Ecosystem Simulator',
   //url: 'https://github.com/digitsensitive/phaser3-typescript',
   //version: '0.0.1',
   //zoom: 3,
@@ -17,5 +17,5 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
       debug: false
     }
   },
-  backgroundColor: '#008763',
+  backgroundColor: '#004033',
 };

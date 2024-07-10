@@ -2,11 +2,14 @@ import { RandomOrganism, CloneOrganism } from "../helpers/organism-builders";
 import { Meat, Plant } from "../interfaces/food";
 import { Population } from "../interfaces/population";
 import { Organism } from "../objects/organism";
+import * as dat from 'dat.gui'
 
 // Organism count: determined by main screen input
-export var POPCOUNT: number = 4;
-export var POPSIZE: number = 3;
+export var POPCOUNT: number = 5;
+export var POPSIZE: number = 7;
 export var populationMap = new Map<number, Population>();
+export var mapWidth = 0;
+export var mapHeight = 0;
 
 export class GameScene extends Phaser.Scene {
     // Tile map stuff
@@ -21,6 +24,8 @@ export class GameScene extends Phaser.Scene {
     private waterBodies: Phaser.GameObjects.Group;
     private allLiving: Organism[];
 
+    private controls: Phaser.Cameras.Controls.SmoothedKeyControl;
+
     constructor() {
         super({
             key: 'GameScene'
@@ -31,7 +36,7 @@ export class GameScene extends Phaser.Scene {
     init(): void {}
 
     createTree(x: number, y: number): void {
-        const tree = this.add.image(x*80, (y*80)-20, 'treeBg');
+        const tree = this.add.image((x*80)+38, (y*80)+15, 'treeBg');
         tree.scale = 1.2;
         this.trees.add(tree);
     }
@@ -40,7 +45,7 @@ export class GameScene extends Phaser.Scene {
         let berry: Plant = new Plant({
             scene: this, texture: 'berrySource', 
             texture2: 'depleted_berrySource',
-            rect: new Phaser.GameObjects.Rectangle(this, (x*80), (y*80)+25)
+            rect: new Phaser.GameObjects.Rectangle(this, (x*80)+38, (y*80)+55)
         })
         this.berries.add(berry);
     }
@@ -49,20 +54,20 @@ export class GameScene extends Phaser.Scene {
         let meat: Meat = new Meat({
             scene: this, texture: 'meatSource', 
             texture2: 'depleted_meatSource',
-            rect: new Phaser.GameObjects.Rectangle(this, x, y+25)
+            rect: new Phaser.GameObjects.Rectangle(this, x+38, y+55)
         }, nutritionCap)
         this.carrion.add(meat);
         return meat;
     }
 
     createWaterBody(x: number, y: number): void {
-        const water = this.add.image(x*80, (y*80)+10, 'waterBg');
+        const water = this.add.image((x*80)+38, (y*80)+40, 'waterBg');
         this.waterBodies.add(water);
     }
 
     create(): void {
         // Generate tile map
-        this.map = this.make.tilemap( {key: 'evoBg'} );
+        this.map = this.make.tilemap( {key: 'ecoBg'} );
         this.tileset = this.map.addTilesetImage('grass', 'grassBg');
 
         this.backgroundLayer = this.map.createLayer(
@@ -71,6 +76,9 @@ export class GameScene extends Phaser.Scene {
             0,
             0,
         );
+
+        mapWidth = this.map.widthInPixels/2.5;
+        mapHeight = this.map.heightInPixels/2.5;
         
         // Set up interaction things
         this.trees = this.add.group();
@@ -103,8 +111,8 @@ export class GameScene extends Phaser.Scene {
         for (let x=0; x < POPCOUNT; x++) {
             let newPop: Population = {phenotypeMap: new Map(), livingIndividuals: [], id: x, updateNeeded: false};
             
-            let newX = Phaser.Math.Between(0, window.innerWidth-50);
-            let newY = Phaser.Math.Between(0, window.innerHeight+75);
+            let newX = Phaser.Math.Between(0, mapWidth);
+            let newY = Phaser.Math.Between(0, mapHeight);
             let org = RandomOrganism(this, newX, newY, x);
 
             newPop.livingIndividuals[0] = org;
@@ -112,8 +120,8 @@ export class GameScene extends Phaser.Scene {
             this.allLiving.push(newPop.livingIndividuals[0]);
 
             for (let y=1; y < POPSIZE; y++) {
-                let newX = Phaser.Math.Between(0, window.innerWidth-50);
-                let newY = Phaser.Math.Between(0, window.innerHeight+75);
+                let newX = Phaser.Math.Between(0, mapWidth);
+                let newY = Phaser.Math.Between(0, mapHeight);
                 let newOrg = CloneOrganism(this, newX, newY, org);
                 newPop.livingIndividuals[y] = newOrg;
                 newPop.livingIndividuals[y].Draw();
@@ -131,7 +139,45 @@ export class GameScene extends Phaser.Scene {
 
         this.setOrgDepth();
 
+        // Camera/World controls and config.
+        const cursors = this.input.keyboard.createCursorKeys();
+
+        const controlConfig = {
+            camera: this.cameras.main,
+            left: cursors.left,
+            right: cursors.right,
+            up: cursors.up,
+            down: cursors.down,
+            zoomIn: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q),
+            zoomOut: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E),
+            acceleration: 0.1,
+            drag: 0.0005,
+            maxSpeed: 3
+        };
+
+        this.controls = new Phaser.Cameras.Controls.SmoothedKeyControl(controlConfig);
+
+        const cam = this.cameras.main;
+
+        const gui = new dat.GUI();
+
+        const help = {
+            line1: 'Cursors to move',
+            line2: 'Q & E to zoom'
+        }
+
+        const f1 = gui.addFolder('Camera');
+        f1.add(cam, 'x').listen();
+        f1.add(cam, 'y').listen();
+        f1.add(cam, 'scrollX').listen();
+        f1.add(cam, 'scrollY').listen();
+        f1.add(cam as any, 'rotation').min(0).step(0.01).listen();
+        f1.add(cam, 'zoom', 0.1, 2).step(0.1).listen();
+        f1.add(help, 'line1');
+        f1.add(help, 'line2');
+        f1.open();
     }
+
 
     // Set up depth of organisms on screen based on collision/overlap detection.
     setOrgDepth() {
@@ -237,7 +283,10 @@ export class GameScene extends Phaser.Scene {
         })
     }
 
-    update() {
+    update (time: number, delta: number) {
+        // Update Camera/World controls
+        this.controls.update(delta);
+        
         // Check for updates to living individuals
         populationMap.forEach((pop: Population) => {
             if (pop.updateNeeded == true) {

@@ -24,7 +24,7 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "evolution simulator": "cd evolution-simulator && yarn && yarn run serve-dev",
+    "ecosystem simulator": "cd ecosystem-simulator && yarn && yarn run serve-dev",
     "prettier": "yarn prettier-ts && yarn prettier-json && yarn prettier-html",
     "prettier-ts": "prettier --write \"**/*.ts\"",
     "prettier-json": "prettier --write \"**/*.json\"",
@@ -44,6 +44,7 @@
   },
   "homepage": "https://github.com/digitsensitive/phaser3-typescript#readme",
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "webfontloader": "^1.6.28"
   }
 }
