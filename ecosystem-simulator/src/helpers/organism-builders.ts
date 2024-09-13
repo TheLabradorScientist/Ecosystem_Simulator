@@ -47,3 +47,8 @@ export function CloneOrganism(scene: Phaser.Scene, x: number, y: number, origina
 
 // 2 & 3) Asexual vs sexual reproduction - will take one or two organism phenotypes, resp.
 // Menu settings configure which one to use.
+
+// 3) Sexual reproduction
+export function BreedOrganisms(scene: Phaser.Scene, x: number, y: number, parentA: Organism, parentB: Organism) {
+    
+}

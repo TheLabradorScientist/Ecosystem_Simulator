@@ -39,7 +39,7 @@ export class Plant extends Food {
 
     Update() {
         if (this.currNutrition < this.nutritionCap) {
-            this.currNutrition+=0.0025;
+            this.currNutrition+=0.025;
         }
         if (this.currNutrition < 0.5*this.nutritionCap) {
             if (this.texture.key != this.empty_texture) {
@@ -71,6 +71,6 @@ export class Meat extends Food {
         if (this.currNutrition < 0.5*this.nutritionCap && this.texture.key != this.empty_texture) {
             this.setTexture(this.empty_texture); 
         }
-        this.currNutrition -= 0.001;
+        this.currNutrition -= 0.01;
     }
 }

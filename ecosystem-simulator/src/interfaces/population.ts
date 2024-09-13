@@ -1,4 +1,4 @@
-import { Organism } from "../objects/organism";
+import { Organism, Phenotype } from "../objects/organism";
 
 export interface Population {
 
@@ -8,12 +8,12 @@ export interface Population {
     // Map containing all unique individuals in population 
     // Each key = organism with unique set of traits.
     // Each value = # of organisms with the phenotype.
-    phenotypeMap: Map<Organism, number>,
+    phenotypeMap: Map<Phenotype, number>,
     // or maybe a Set<Organism> ?? May need to use a 
     // Set containing unique arrays of traits.
 
-    // Array of all living organisms in the population.
-    livingIndividuals: Organism[],
+    // Set of all living organisms in the population.
+    livingIndividuals: Set<Organism>,
 
     updateNeeded: boolean
 }

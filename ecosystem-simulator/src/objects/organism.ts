@@ -9,12 +9,14 @@ import { Meat, Plant } from "../interfaces/food";
 import { GameScene, populationMap } from "../scenes/game-scene";
 import { CloneOrganism } from "../helpers/organism-builders";
 
+export type Phenotype = Map<Part, Trait>
+
 export class Organism extends Phaser.GameObjects.GameObject { 
     head: Head;
     torso: Torso;
     limbs: Limbs;
     tail: Tail;
-    phenotype: Map<Part, Trait>;
+    phenotype: Phenotype;
     
     private hunger: number;
     private energy: number; // Determines the probability that the organism will move.
@@ -45,6 +47,8 @@ export class Organism extends Phaser.GameObjects.GameObject {
     sceneBounds: Phaser.Geom.Rectangle;
     rect: Phaser.GameObjects.Rectangle;
     orientation: string;
+
+    grid_index: number;
 
     constructor(scene: Phaser.Scene, rect: Phaser.GameObjects.Rectangle, bounds: Phaser.Geom.Rectangle,
         popID: number, newColor: number, newSize: number, newHead: Head, newTorso: Torso, newLimbs: Limbs, newTail: Tail)
@@ -109,7 +113,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         this.setupEventListeners();
         this.info = new Info({ 
             scene: this.scene, texture: 'info', 
-            rect: new Phaser.GameObjects.Rectangle(this.scene, 400, 300, 400, 500)}, 
+            rect: new Phaser.GameObjects.Rectangle(this.scene, this.rect.x, this.rect.y, 400, 500)}, 
             this.toString()).setVisible(false).setDepth(5);
     }
 
@@ -142,7 +146,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         }
 
         // Update organism mating conditions
-        // First, check if both unable to and old enough
+        // First, check if both able to and old enough
         if (this.canMate == false && this.age >= 20) {
             // Check if reproduction interval is complete.
             if (this.rep_interval <= 0) {
@@ -238,7 +242,8 @@ export class Organism extends Phaser.GameObjects.GameObject {
                             for (let x = 0; x < randNum; x++) {
                                 let newOrg = CloneOrganism(this.scene, this.rect.x, this.rect.y, this);
                                 newOrg.status = 0;
-                                pop.livingIndividuals.push(newOrg);
+                                newOrg.grid_index = this.grid_index;
+                                pop.livingIndividuals.add(newOrg);
                             }
                             pop.updateNeeded = true;
                             this.target.object.canMate = false;
@@ -267,7 +272,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
     Move() {
         // Maybe make movement affected by energy
         //console.log(this.energy, "/", this.characteristics.metabolism, "=", this.energy/this.characteristics.metabolism );
-        const movement = (10 + this.characteristics.speed/2)* this.energy/this.characteristics.metabolism;
+        const movement = (12 + this.characteristics.speed/1.5)* this.energy/this.characteristics.metabolism;
         if (movement < 0) {            
             if (this.hunger < this.characteristics.metabolism*3/4 && this.energy < this.characteristics.metabolism) {
                 this.energy++;
@@ -369,7 +374,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         this.detector.sectorGraphic = DrawSector(this.detector.sectorGraphic, this.detector.sector)
     }
 
-    Sense(object: null | Phaser.GameObjects.Image | Plant | Meat | Organism) {   
+    Sense(object: Phaser.GameObjects.Image | Plant | Meat | Organism) {   
         //console.log(this.detector.detectedObjects);  
         if (object != null) {
             let objectBounds: Phaser.Geom.Rectangle;
@@ -471,13 +476,14 @@ export class Organism extends Phaser.GameObjects.GameObject {
             return false;
         }
 
-        //if checkIfPredator => true, then set target with - relationship,
+        // if checkIfPredator => true, then set target with - relationship,
         // dependent on strength vs speed. Low speed, high strength
         // => closer to neutral (0). Maybe separate method for calculating
         // probability of fight or flight. Maybe aggression variable will
         // mean + relationship target even if predator = true.
     }
 
+    // This is occasionally causing an error for organisms that were hunted.
     Die(): Meat {
         let pop = populationMap.get(this.populationID);
         this.status = -1;
