@@ -59,6 +59,9 @@ export class GameScene extends Phaser.Scene {
             texture2: 'depleted_meatSource',
             rect: new Phaser.GameObjects.Rectangle(this, x+38, y+55)
         }, nutritionCap)
+        if (meat !instanceof Meat) {
+            return null;
+        }
         this.carrion.add(meat);
         this.grid.AddObject(meat);
         return meat;
@@ -238,7 +241,7 @@ export class GameScene extends Phaser.Scene {
 
     // Check adjacent boxes for organism collision
     CheckOrgColliders(org: Organism, objColl: Phaser.GameObjects.Image[], orgColl: Set<Organism>) {
-        if (org === undefined || org.drawnParts === undefined || org.status != 1) {
+        if (typeof org === 'undefined' || typeof org.drawnParts === 'undefined' || org.status != 1) {
             return;   
         }
         // Set default organism and detector depth.
@@ -297,11 +300,11 @@ export class GameScene extends Phaser.Scene {
 
         for (let [, pop] of populationMap) {   
             pop.livingIndividuals.forEach((org: Organism) => {
-                if (org === undefined || org.drawnParts === undefined || org.status !== 1) {
+                if (typeof org === 'undefined' || typeof org.drawnParts === 'undefined' || org.status !== 1) {
                     return;   
                 }
 
-                console.log(org.grid_index)
+                //console.log(org.grid_index)
 
                 const adjacentBoxes = this.grid.GetAdjacentBoxes(org.grid_index);
                 let arr: Phaser.GameObjects.Image[] = []; 
@@ -327,7 +330,7 @@ export class GameScene extends Phaser.Scene {
                 let tempIndex = (org.rect.x >=0 && org.rect.y >= 0 
                     && org.rect.x < 8 * 320 && org.rect.y < 8*320) ? 
                         this.grid.ConvertXYToIndex(org.rect.x, org.rect.y) : org.grid_index;
-                if (!Number.isNaN(tempIndex) && tempIndex != undefined && tempIndex !== org.grid_index) {
+                if (!Number.isNaN(tempIndex) && typeof tempIndex !== 'undefined' && tempIndex !== org.grid_index) {
                     // console.log(tempIndex)
                     this.grid.boxes[org.grid_index].containedOrganisms.delete(org);
                     this.grid.boxes[tempIndex].containedOrganisms.add(org);

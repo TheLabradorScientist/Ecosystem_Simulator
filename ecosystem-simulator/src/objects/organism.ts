@@ -328,9 +328,8 @@ export class Organism extends Phaser.GameObjects.GameObject {
                 this.hunger -= this.target.object.currNutrition;
                 this.target.object.currNutrition = 0;
             }
-
+            this.energy = this.characteristics.metabolism-this.hunger;
         }
-        this.energy = this.characteristics.metabolism-this.hunger;
         console.log("Target dropped: Food")
     }
 
@@ -488,7 +487,8 @@ export class Organism extends Phaser.GameObjects.GameObject {
         let pop = populationMap.get(this.populationID);
         this.status = -1;
         pop.updateNeeded = true;
-        let remains = this.scene.createCarrion(this.rect.x, this.rect.y, this.nutritionCap)
+        let remains = typeof this !== 'undefined' && typeof this.rect !== 'undefined' && typeof this.scene !== 'undefined' ? 
+            this.scene.createCarrion(this.rect.x, this.rect.y, this.nutritionCap) : null;
         this.drawnParts.destroy(true, true);
         this.detector.sectorGraphic.destroy(true);
         this.info.infoDisplay.destroy(true);
