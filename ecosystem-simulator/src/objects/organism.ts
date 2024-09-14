@@ -197,7 +197,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
                 // definite lock if |relationship| > 5. 
                 // definite not if |relationship| < 2. 
                 if (Math.abs(this.target.relationship) + Phaser.Math.Between(4, 8) > 10) {
-                    console.log("Target locked: ", this.target.type)
+                    // console.log("Target locked: ", this.target.type)
                     this.targetLock = true; 
                 } else {
                     this.target = {object: null, objectBounds: null, relationship: 0, type: null};
@@ -318,6 +318,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         //this.target.object -- update function that reduces nutrition
         if (this.target.object instanceof Organism) {
             this.target.object = this.target.object.Die();
+            console.log("Hunt succesful! Remains are meat? ", this.target.object instanceof Meat)
         }
 
         if (this.target.object instanceof Plant || this.target.object instanceof Meat) {
@@ -330,7 +331,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
             }
             this.energy = this.characteristics.metabolism-this.hunger;
         }
-        console.log("Target dropped: Food")
+        // console.log("Target dropped: Food")
     }
 
     MapTraits(partType: string[], traits: Trait[]) {
@@ -487,7 +488,7 @@ export class Organism extends Phaser.GameObjects.GameObject {
         let pop = populationMap.get(this.populationID);
         this.status = -1;
         pop.updateNeeded = true;
-        let remains = typeof this !== 'undefined' && typeof this.rect !== 'undefined' && typeof this.scene !== 'undefined' ? 
+        const remains = typeof this !== 'undefined' && typeof this.rect !== 'undefined' && typeof this.scene !== 'undefined' ? 
             this.scene.createCarrion(this.rect.x, this.rect.y, this.nutritionCap) : null;
         this.drawnParts.destroy(true, true);
         this.detector.sectorGraphic.destroy(true);

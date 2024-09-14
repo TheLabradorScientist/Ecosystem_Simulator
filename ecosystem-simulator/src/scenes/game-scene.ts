@@ -4,10 +4,8 @@ import { Food, Meat, Plant } from "../interfaces/food";
 import { Population } from "../interfaces/population";
 import { Organism } from "../objects/organism";
 import * as dat from 'dat.gui'
+import { POPCOUNT, POPSIZE } from "./menu-scene";
 
-// Organism count: determined by main screen input
-export var POPCOUNT: number = 7;
-export var POPSIZE: number = 5;
 export var populationMap = new Map<number, Population>();
 export var mapWidth = 0;
 export var mapHeight = 0;
@@ -59,7 +57,7 @@ export class GameScene extends Phaser.Scene {
             texture2: 'depleted_meatSource',
             rect: new Phaser.GameObjects.Rectangle(this, x+38, y+55)
         }, nutritionCap)
-        if (meat !instanceof Meat) {
+        if (!(meat instanceof Meat)) {
             return null;
         }
         this.carrion.add(meat);
@@ -204,14 +202,11 @@ export class GameScene extends Phaser.Scene {
 
             // Check intersection of bounding rectangles, return if any collision detected.
             if (Phaser.Geom.Intersects.RectangleToRectangle(orgBounds, elemBounds)) {
-                if (elem !instanceof Food && elem !instanceof Organism) {
-                    console.log("TREE");
-                }
                 collided = elem;
             }
 
             // TEMP-CODE UNTIL TREE FUNCTIONALITY IMPLEMENTED
-            if (elem !instanceof Food && elem !instanceof Organism) {
+            if (!(elem instanceof Food) && !(elem instanceof Organism)) {
                 return;
             }
 
