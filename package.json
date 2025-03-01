@@ -45,6 +45,7 @@
   "homepage": "https://github.com/digitsensitive/phaser3-typescript#readme",
   "dependencies": {
     "dat.gui": "^0.7.9",
+    "gh-pages": "^6.3.0",
     "webfontloader": "^1.6.28"
   }
 }
